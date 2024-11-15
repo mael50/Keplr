@@ -1,0 +1,216 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    {% set categories = [] %}
+    {% for tool in tools %}
+        {% for category in tool.categories %}
+            {% if category.name not in categories %}
+                {% set categories = categories|merge([category.name]) %}
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold mb-8">Catalogue des outils</h1>
+        <!-- Barre de recherche -->
+        <div class="mb-8">
+            <div class="relative my-4">
+                <input 
+                    type="text" 
+                    id="search-input"
+                    placeholder="Rechercher un outil..." 
+                    class="w-full px-4 py-2 pl-10 pr-4 rounded-lg border-2 border-gray-200 focus:border-indigo-600 focus:outline-none"
+                >
+                <svg class="absolute left-3 top-3 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </input>
+        </div>
+
+        <!-- Filtres -->
+        <div class="mb-8">
+            <h3 class="text-lg font-semibold mb-4">Filtrer par catégories</h3>
+            <div class="flex flex-wrap gap-2" id="filters">
+                <button 
+                    class="px-4 py-2 rounded-full border-2 border-gray-200 hover:border-indigo-600 transition-colors filter-btn active"
+                    data-category="all"
+                >
+                    Toutes les catégories
+                </button>
+                {% for category in categories %}
+                    <button 
+                        class="px-4 py-2 rounded-full border-2 border-gray-200 hover:border-indigo-600 transition-colors filter-btn"
+                        data-category="{{ category|lower }}"
+                    >
+                        {{ category }}
+                    </button>
+                {% endfor %}
+            </div>
+            <!-- Filtres actifs -->
+            <div id="active-filters" class="mt-4 flex flex-wrap gap-2">
+            </div>
+        </div>
+
+        <!-- Liste des outils -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="tools-grid">
+            {% for tool in tools %}
+                <div class="tool-card bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
+     data-categories="{{ tool.categories|map(c => c.name|lower)|join(' ') }}"
+     data-name="{{ tool.name|lower }}"
+     data-description="{{ tool.description|lower }}">
+    <div class="relative aspect-video">
+        {% if tool.cover is not null %}
+            <img 
+                src="{{ tool.cover }}" 
+                alt="{{ tool.name }}"
+                class="absolute inset-0 w-full h-full object-cover"
+            >
+        {% else %}
+            <img 
+                src="/images/tool_placeholder.jpg" 
+                alt="{{ tool.name }}"
+                class="absolute inset-0 w-full h-full object-cover"
+            >
+        {% endif %}
+        <!-- Bouton de suppression -->
+        <a href="{{ path('app_tool_delete', {'id': tool.id}) }}" 
+           class="absolute top-2 right-2 text-gray-400 hover:text-red-600 transition-colors"
+           title="Supprimer cet outil">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </a>
+    </div>
+    
+    <!-- Contenu -->
+    <div class="p-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-2">{{ tool.name }}</h2>
+        <p class="text-gray-600 mb-4 line-clamp-2">{{ tool.description }}</p>
+        
+        <!-- Catégories -->
+        <div class="flex flex-wrap gap-2 mb-4">
+            {% for categorie in tool.categories %}
+                <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
+                    {{ categorie.name }}
+                </span>
+            {% endfor %}
+        </div>
+        
+        <!-- Bouton -->
+        <a 
+            href="{{ tool.url }}" target="_blank"
+            class="inline-block px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200"
+        >
+            En savoir plus
+        </a>
+    </div>
+</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('turbo:load', function() {
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const toolCards = document.querySelectorAll('.tool-card');
+            const searchInput = document.getElementById('search-input');
+            const activeFiltersContainer = document.getElementById('active-filters');
+            let activeFilters = new Set(['all']);
+            let searchTerm = '';
+            searchInput.addEventListener('input', function(e) {
+                searchTerm = e.target.value.toLowerCase();
+                filterTools();
+            });
+
+            function updateActiveFilters() {
+                activeFiltersContainer.innerHTML = '';
+                if (activeFilters.has('all')) {
+                    return;
+                }
+                
+                activeFilters.forEach(filter => {
+                    const filterTag = document.createElement('span');
+                    filterTag.className = 'px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm flex items-center';
+                    filterTag.innerHTML = `
+                        ${filter}
+                        <button class="ml-2 text-indigo-600 hover:text-indigo-800" data-remove="${filter}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    `;
+                    activeFiltersContainer.appendChild(filterTag);
+                });
+
+                activeFiltersContainer.querySelectorAll('button').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        const filterToRemove = this.getAttribute('data-remove');
+                        activeFilters.delete(filterToRemove);
+                        document.querySelector(`[data-category="${filterToRemove}"]`).classList.remove('active');
+                        if (activeFilters.size === 0) {
+                            activeFilters.add('all');
+                            document.querySelector('[data-category="all"]').classList.add('active');
+                        }
+                        filterTools();
+                        updateActiveFilters();
+                    });
+                });
+            }
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const category = this.getAttribute('data-category');
+                    
+                    if (category === 'all') {
+                        activeFilters.clear();
+                        activeFilters.add('all');
+                        filterBtns.forEach(btn => btn.classList.remove('active'));
+                        this.classList.add('active');
+                    } else {
+                        activeFilters.delete('all');
+                        this.classList.toggle('active');
+                        
+                        if (this.classList.contains('active')) {
+                            activeFilters.add(category);
+                        } else {
+                            activeFilters.delete(category);
+                        }
+                        
+                        if (activeFilters.size === 0) {
+                            activeFilters.add('all');
+                            document.querySelector('[data-category="all"]').classList.add('active');
+                        }
+                    }
+                    
+                    updateActiveFilters();
+                    filterTools();
+                });
+            });
+
+            function filterTools() {
+                toolCards.forEach(card => {
+                    const cardCategories = card.getAttribute('data-categories').split(' ');
+                    const cardName = card.getAttribute('data-name');
+                    const cardDescription = card.getAttribute('data-description');
+                    
+                    const matchesSearch = searchTerm === '' || 
+                        cardName.includes(searchTerm) || 
+                        cardDescription.includes(searchTerm) ||
+                        cardCategories.some(cat => cat.includes(searchTerm));
+                    
+                    const matchesFilter = activeFilters.has('all') || 
+                        Array.from(activeFilters).some(filter => cardCategories.includes(filter));
+
+                    card.style.display = (matchesSearch && matchesFilter) ? 'block' : 'none';
+                });
+            }
+
+            updateActiveFilters();
+        });
+    </script>
+
+    <style>
+        .filter-btn.active {
+            @apply border-indigo-600 bg-indigo-600 text-white;
+        }
+    </style>
+{% endblock %}
