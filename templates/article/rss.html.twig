@@ -3,75 +3,7 @@
 {% block title %}Articles du flux{% endblock %}
 
 {% block body %}
-<div class="min-h-screen">
-    <div class="container mx-auto px-4 py-8 max-w-5xl">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
-            <h1 class="text-4xl font-bold text-gray-800 tracking-tight">
-                <span class="text-primary-600">{{ articles[0].RssFeed.name }}</span>
-            </h1>
-        </div>
-
-        {% if articles|length == 0 %}
-            <div class="text-center py-16 bg-white rounded-xl shadow-sm">
-                <i class="far fa-newspaper text-4xl text-gray-400 mb-4"></i>
-                <div class="text-gray-500 text-lg">Aucun article n'a été trouvé dans ce flux</div>
-            </div>
-        {% else %}
-            <div class="grid grid-cols-1 gap-6">
-                {% for article in articles %}
-                    <article class="bg-white rounded-xl shadow-lg hover:shadow-md p-6 transition-all duration-200">
-                        <div class="flex flex-col gap-3">
-                            <div class="flex items-center justify-between">
-                                {% if article.pubDate %}
-                                    <div class="flex items-center text-sm text-gray-500">
-                                        <i class="far fa-clock mr-2"></i>
-                                        {{ article.pubDate|date('d/m/Y H:i') }}
-                                    </div>
-                                {% endif %}
-                                {% if article.link %}
-                                    <a href="{{ article.link }}" 
-                                       target="_blank" 
-                                       class="text-gray-400 hover:text-indigo-600">
-                                        <i class="fas fa-external-link-alt"></i>
-                                    </a>
-                                {% endif %}
-                            </div>
-
-                            <h3 class="text-xl font-bold text-gray-900">
-                                <a href="{{ article.link ?? '#' }}" 
-                                   target="_blank"
-                                   class="hover:text-indigo-600 transition-colors">
-                                    {{ article.title ?? 'Sans titre' }}
-                                </a>
-                            </h3>
-
-                            {% if article.description %}
-                                <p class="text-gray-600 line-clamp-3 text-base leading-relaxed">
-                                    {{ article.description|striptags }}
-                                </p>
-                            {% endif %}
-
-                            {% if article.link %}
-                                <div class="pt-4 mt-auto">
-                                    <a href="{{ article.link }}" 
-                                       target="_blank"
-                                       class="inline-flex items-center px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors group">
-                                        Lire l'article complet
-                                        <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
-                                    </a>
-                                </div>
-                            {% endif %}
-                        </div>
-                    </article>
-                {% endfor %}
-            </div>
-        {% endif %}
-    </div>
+<div class="container mx-auto px-4 py-8 max-w-5xl">
+    {{ component('ArticleGrid', { rssFeed: rssFeed }) }}
 </div>
-
-<style>
-    .group:hover .group-hover\:translate-x-1 {
-        transform: translateX(4px);
-    }
-</style>
 {% endblock %}

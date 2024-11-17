@@ -13,6 +13,8 @@
             <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
             {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}
+        {{ encore_entry_link_tags('app') }}
+
     </head>
     <body class="flex">
         {% include 'partials/sidebar.html.twig' %}
@@ -21,5 +23,6 @@
             {% block body %}
             {% endblock %}
         </div>
+        {{ encore_entry_script_tags('app') }}
     </body>
 </html>

@@ -40,10 +40,8 @@ class ArticleController extends AbstractController
     #[Route('/news/{rssFeed}', name: 'app_article_rss')]
     public function rss(RSSFeed $rssFeed): Response
     {
-        $articles = $this->articleRepository->findByRssFeed($rssFeed);
-
         return $this->render('article/rss.html.twig', [
-            'articles' => $articles,
+            'rssFeed' => $rssFeed,
         ]);
     }
 }

@@ -1,0 +1,66 @@
+<div class="ArticleGrid" {{ attributes }}>
+    <div id="results" class="grid grid-cols-1 gap-6">
+        {% if page > 1 %}
+            <div class="ArticleGrid_page" id="page--{{ page - 1 }}" data-live-ignore="true"></div>
+        {% endif %}
+
+        <div class="ArticleGrid_page" id="page--{{ page }}" data-live-ignore="true">
+            {% for article in this.items %}
+                <article class="bg-white rounded-xl shadow-lg hover:shadow-md p-6 mt-2 transition-all duration-200">
+                    <div class="flex flex-col gap-3">
+                        <div class="flex items-center justify-between">
+                            {% if article.pubDate %}
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="far fa-clock mr-2"></i>
+                                    {{ article.pubDate|date('d/m/Y H:i') }}
+                                </div>
+                            {% endif %}
+                            {% if article.link %}
+                                <a href="{{ article.link }}" 
+                                   target="_blank" 
+                                   class="text-gray-400 hover:text-indigo-600">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+
+                        <h3 class="text-xl font-bold text-gray-900">
+                            <a href="{{ article.link ?? '#' }}" 
+                               target="_blank"
+                               class="hover:text-indigo-600 transition-colors">
+                                {{ article.title ?? 'Sans titre' }}
+                            </a>
+                        </h3>
+
+                        {% if article.description %}
+                            <p class="text-gray-600 line-clamp-3 text-base leading-relaxed">
+                                {{ article.description|striptags }}
+                            </p>
+                        {% endif %}
+
+                        {% if article.link %}
+                            <div class="pt-4 mt-auto">
+                                <a href="{{ article.link }}" 
+                                   target="_blank"
+                                   class="inline-flex items-center px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors group">
+                                    Lire l'article complet
+                                    <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+
+        <div class="flex justify-center mt-4">
+            {% if this.hasMore %}
+                <button data-action="live#action" data-live-action-param="more" class="btn btn-primary ArticleGrid_more">
+                    Charger plus
+                </button>
+            {% else %}
+                <span class="text-gray-500">Fin des articles</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
