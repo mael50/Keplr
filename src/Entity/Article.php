@@ -29,6 +29,9 @@ class Article
     #[ORM\ManyToOne(inversedBy: 'articles')]
     private ?RSSFeed $RssFeed = null;
 
+    #[ORM\Column]
+    private ?bool $isRead = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -90,6 +93,18 @@ class Article
     public function setRssFeed(?RSSFeed $RssFeed): static
     {
         $this->RssFeed = $RssFeed;
+
+        return $this;
+    }
+
+    public function isRead(): ?bool
+    {
+        return $this->isRead;
+    }
+
+    public function setRead(bool $isRead): static
+    {
+        $this->isRead = $isRead;
 
         return $this;
     }

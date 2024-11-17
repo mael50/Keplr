@@ -7,6 +7,12 @@
         <div class="ArticleGrid_page" id="page--{{ page }}" data-live-ignore="true">
             {% for article in this.items %}
                 <article class="bg-white rounded-xl shadow-lg hover:shadow-md p-6 mt-2 transition-all duration-200">
+                    {% if not article.isRead %}
+                        <span class="relative flex h-4 w-4 ml-auto">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-300"></span>
+                            <span class="relative inline-flex rounded-full h-4 w-4 bg-red-500"></span>
+                        </span>
+                    {% endif %}
                     <div class="flex flex-col gap-3">
                         <div class="flex items-center justify-between">
                             {% if article.pubDate %}
@@ -49,14 +55,15 @@
 
         {% if this.hasMore %}
             <div 
-                data-appear-target="loader"
-                data-action="appear->live#action"
-                data-live-action-param="debounce(350)|more"
-                class="loading-placeholder opacity-50 hover:opacity-70 transition-opacity duration-300"
+            data-appear-target="loader"
+            data-action="appear->live#action"
+            data-live-action-param="debounce(350)|more"
+            style="opacity: 0.5; transition: opacity 0.3s;"
+            onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=0.5"
             >
-                <div class="animate-pulse bg-gray-200 h-32 rounded-xl mb-4"></div>
-                <div class="animate-pulse bg-gray-200 h-32 rounded-xl mb-4"></div>
-                <div class="animate-pulse bg-gray-200 h-32 rounded-xl"></div>
+            <div style="background-color: #E2E8F0; height: 8rem; border-radius: 0.75rem; margin-bottom: 1rem; animation: pulse 2s infinite;"></div>
+            <div style="background-color: #E2E8F0; height: 8rem; border-radius: 0.75rem; margin-bottom: 1rem; animation: pulse 2s infinite;"></div>
+            <div style="background-color: #E2E8F0; height: 8rem; border-radius: 0.75rem; animation: pulse 2s infinite;"></div>
             </div>
         {% else %}
             <div class="text-center py-8 text-gray-500">

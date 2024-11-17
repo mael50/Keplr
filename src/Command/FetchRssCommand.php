@@ -53,6 +53,7 @@ class FetchRssCommand extends Command
                         $article->setLink((string) $item->link);
                         $article->setPubDate(new \DateTime((string) $item->pubDate));
                         $article->setRssFeed($rssFeed);
+                        $article->setRead(false);
 
                         $this->entityManager->persist($article);
                         $this->entityManager->flush();

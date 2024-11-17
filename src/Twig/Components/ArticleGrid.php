@@ -14,7 +14,7 @@ class ArticleGrid
 {
     use DefaultActionTrait;
 
-    private const PER_PAGE = 3;
+    private const PER_PAGE = 5;
 
     #[LiveProp]
     public int $page = 1;

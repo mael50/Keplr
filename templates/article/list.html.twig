@@ -14,66 +14,86 @@
         <div class="grid grid-cols-1 gap-8">
             {% for feedName, feedArticles in articles %}
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                    {# En-tête du flux RSS #}
                     <div class="bg-gray-50 border-b border-gray-200 px-6 py-4">
                         <div class="flex items-center justify-between">
                             <h2 class="text-xl font-semibold text-gray-900">
-                                {{ feedName }} 
+                                {{ feedName }}
                             </h2>
-                            <!-- Bouton pour accéder aux articles du flux -->
                             <a href="{{ path('app_article_rss', {'rssFeed': feedArticles[0].RssFeed.id}) }}"
-                               class="text-indigo-600 hover:text-indigo-800">
+                               class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition-colors duration-200">
+                                <i class="fas fa-newspaper mr-2"></i>
                                 Voir tous les articles
                             </a>
-
-                            {% if feedArticles[0].RssFeed.url is defined %}
-                                <a href="{{ feedArticles[0].RssFeed.url }}" 
-                                   target="_blank"
-                                   class="text-indigo-600 hover:text-indigo-800">
-                                    <i class="fas fa-external-link-alt"></i>
-                                </a>
-                            {% endif %}
                         </div>
                     </div>
 
-                    {# Liste des articles du flux #}
+                    {% set sortedArticles = feedArticles|sort((a, b) => b.pubDate <=> a.pubDate) %}
+                    {% set latestArticle = sortedArticles|first %}
+                    
+                    {# Article le plus récent #}
+                    <div class="bg-gradient-to-r from-indigo-50 to-white p-6 border-b-2 border-indigo-100">
+                        <div class="text-sm text-indigo-600 font-semibold mb-2">
+                            <i class="fas fa-star mr-2"></i>Article le plus récent
+                        </div>
+                        <article>
+                            {% if not latestArticle.isRead %}
+                                <span class="relative flex h-4 w-4 ml-auto">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-300"></span>
+                                    <span class="relative inline-flex rounded-full h-4 w-4 bg-red-500"></span>
+                                </span>
+                            {% endif %}
+                            <div class="flex flex-col gap-2">
+                                <div class="text-sm text-gray-500">
+                                    <i class="far fa-clock mr-2"></i>
+                                    {{ latestArticle.pubDate|date('d/m/Y H:i') }}
+                                </div>
+                                <h3 class="text-xl font-semibold text-gray-900">
+                                    <a href="{{ latestArticle.link ?? '#' }}" 
+                                    target="_blank"
+                                    data-article-id="{{ latestArticle.id }}"
+                                    class="mark-as-read hover:text-indigo-600 transition-colors">
+                                        {{ latestArticle.title ?? 'Sans titre' }}
+                                    </a>
+                                </h3>
+                                {% if latestArticle.description %}
+                                    <p class="text-gray-600 line-clamp-2">
+                                        {{ latestArticle.description|striptags }}
+                                    </p>
+                                {% endif %}
+                            </div>
+                        </article>
+                    </div>
+
+                    {# Articles non lus #}
                     <div class="divide-y divide-gray-200">
-                        {% for article in feedArticles|sort((a, b) => b.pubDate <=> a.pubDate) %}
-                            <article class="p-6 hover:bg-gray-50 transition-colors duration-200">
-                                <div class="flex flex-col gap-2">
-                                    {% if article.pubDate %}
+                        <div class="p-4 bg-gray-50">
+                            <h3 class="text-sm font-medium text-gray-500">Articles non lus</h3>
+                        </div>
+                        {% for article in sortedArticles %}
+                            {% if not article.isRead and article != latestArticle %}
+                                <article class="p-6 hover:bg-gray-50 transition-colors duration-200">
+                                    <div class="flex flex-col gap-2">
                                         <div class="text-sm text-gray-500">
+                                        {% if not article.isRead %}
+                                            <span class="absolute right-16 flex h-4 w-4 ml-auto mb-2">
+                                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-300"></span>
+                                                <span class="relative inline-flex rounded-full h-4 w-4 bg-red-500"></span>
+                                            </span>
+                                        {% endif %}
                                             <i class="far fa-clock mr-2"></i>
                                             {{ article.pubDate|date('d/m/Y H:i') }}
                                         </div>
-                                    {% endif %}
-
-                                    <h3 class="text-lg font-semibold text-gray-900">
-                                        <a href="{{ article.link ?? '#' }}" 
-                                           target="_blank"
-                                           class="hover:text-indigo-600 transition-colors">
-                                            {{ article.title ?? 'Sans titre' }}
-                                        </a>
-                                    </h3>
-
-                                    {% if article.description %}
-                                        <p class="text-gray-600 line-clamp-2">
-                                            {{ article.description|striptags }}
-                                        </p>
-                                    {% endif %}
-
-                                    {% if article.link %}
-                                        <div class="mt-4">
-                                            <a href="{{ article.link }}" 
+                                        <h3 class="text-lg font-semibold text-gray-900">
+                                            <a href="{{ article.link ?? '#' }}" 
                                                target="_blank"
-                                               class="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-800">
-                                                Lire l'article complet
-                                                <i class="fas fa-arrow-right ml-2"></i>
+                                               data-article-id="{{ article.id }}"
+                                               class="mark-as-read hover:text-indigo-600 transition-colors">
+                                                {{ article.title ?? 'Sans titre' }}
                                             </a>
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </article>
+                                        </h3>
+                                    </div>
+                                </article>
+                            {% endif %}
                         {% endfor %}
                     </div>
                 </div>
@@ -90,4 +110,35 @@
         overflow: hidden;
     }
 </style>
+
+<script>
+document.querySelectorAll('.mark-as-read').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const articleId = this.dataset.articleId;
+        const articleLink = this.href;
+        const articleElement = this.closest('article');
+        const unreadDot = articleElement.querySelector('.relative.flex.h-4.w-4');
+
+        fetch(`/news/mark-as-read/${articleId}`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (unreadDot) {
+                    unreadDot.remove();
+                }
+                window.open(articleLink, '_blank');
+            }
+        })
+        .catch(error => console.error('Erreur:', error));
+    });
+});
+</script>
 {% endblock %}

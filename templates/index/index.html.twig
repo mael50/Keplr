@@ -30,6 +30,72 @@
                     </div>
                 </div>
 
+                <!-- Récapitulatif des articles -->
+                <div class="bg-white rounded-xl shadow-lg p-6 my-4 transition-all duration-300 hover:shadow-xl">
+                    <div class="flex items-center justify-between mb-8">
+                        <h2 class="text-2xl font-bold text-gray-900">Articles du jour</h2>
+                        <div class="flex items-center gap-6">
+                            <button id="prevDay" class="p-3 rounded-lg hover:bg-indigo-50 text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span id="currentDate" class="text-sm font-semibold text-gray-700"></span>
+                            <button id="nextDay" class="p-3 rounded-lg hover:bg-indigo-50 text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    {% if articles|length > 0 %}
+                        {% set dates = articles|keys|sort|reverse %}
+                        {% for date, feedArticles in articles %}
+                            <div class="date-content" data-date="{{ date }}" style="display: none;">
+                                <div class="space-y-6">
+                                    {% for feedName, articles in feedArticles %}
+                                        <div class="bg-gray-50 rounded-xl p-5 hover:bg-gray-100 transition-colors duration-200">
+                                            <div class="flex items-center gap-3 text-sm font-medium text-gray-700 mb-4">
+                                                <i class="fas fa-rss text-indigo-500"></i>
+                                                <span>{{ feedName }}</span>
+                                            </div>
+                                            <ul class="space-y-4">
+                                                {% for article in articles %}
+                                                    <li>
+                                                        <a href="{{ article.link }}" 
+                                                        data-article-id="{{ article.id }}"
+                                                        target="_blank"
+                                                        class="mark-as-read group flex items-start gap-4 p-3 rounded-xl transition-all duration-200 hover:bg-white hover:shadow-md">
+                                                            {% if not article.isRead %}
+                                                                <span class="relative flex h-3 w-3 mt-1.5">
+                                                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                                                    <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                                                                </span>
+                                                            {% endif %}
+                                                            <div>
+                                                                <h4 class="text-gray-900 group-hover:text-indigo-600 font-semibold transition-colors duration-200">
+                                                                    {{ article.title }}
+                                                                </h4>
+                                                                <p class="text-sm text-gray-600 line-clamp-1 mt-2 group-hover:text-gray-700">
+                                                                    {{ article.description|striptags }}
+                                                                </p>
+                                                                <span class="text-xs font-medium text-gray-500 mt-2 inline-block">
+                                                                    {{ article.pubDate|date('H:i') }}
+                                                                </span>
+                                                            </div>
+                                                        </a>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-12 text-gray-500">
+                            <p class="text-lg">Aucun article pour le moment</p>
+                        </div>
+                    {% endif %}
+                </div>
+
                 <!-- Formulaire Tool -->
                 <div class="bg-gray-50 rounded-xl p-6 my-4">
                     <h2 class="text-xl font-semibold text-gray-900 mb-6">Ajouter un nouvel outil</h2>
@@ -76,6 +142,8 @@
                         </div>
                     {{ form_end(rssFeedForm) }}
                 </div>
+
+                
             </div>
         </div>
     </div>
@@ -89,5 +157,84 @@
     .bg-white:hover {
         transform: translateY(-2px);
     }
+    .line-clamp-1 {
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dates = {{ dates|json_encode|raw }};
+    let currentIndex = 0;
+    const prevBtn = document.getElementById('prevDay');
+    const nextBtn = document.getElementById('nextDay');
+    const currentDateEl = document.getElementById('currentDate');
+    const dateContents = document.querySelectorAll('.date-content');
+
+    function updateDisplay() {
+        dateContents.forEach(el => el.style.display = 'none');
+        const currentDate = dates[currentIndex];
+        document.querySelector(`[data-date="${currentDate}"]`).style.display = 'block';
+        
+        // Formater la date pour l'affichage
+        const dateObj = new Date(currentDate);
+        const options = { weekday: 'long', day: 'numeric', month: 'long' };
+        currentDateEl.textContent = dateObj.toLocaleDateString('fr-FR', options);
+
+        // Gérer l'état des boutons
+        prevBtn.disabled = currentIndex === dates.length - 1;
+        nextBtn.disabled = currentIndex === 0;
+    }
+
+    prevBtn.addEventListener('click', () => {
+        if (currentIndex < dates.length - 1) {
+            currentIndex++;
+            updateDisplay();
+        }
+    });
+
+    nextBtn.addEventListener('click', () => {
+        if (currentIndex > 0) {
+            currentIndex--;
+            updateDisplay();
+        }
+    });
+
+    updateDisplay();
+});
+
+document.querySelectorAll('.mark-as-read').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const articleId = this.dataset.articleId;
+        const articleLink = this.href;
+        const articleElement = this;
+
+        fetch(`/news/mark-as-read/${articleId}`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Supprimer l'indicateur non lu
+                const unreadIndicator = articleElement.querySelector('.relative.flex.h-3.w-3');
+                if (unreadIndicator) {
+                    unreadIndicator.remove();
+                }
+                // Ouvrir le lien dans un nouvel onglet
+                window.open(articleLink, '_blank');
+            }
+        })
+        .catch(error => console.error('Erreur:', error));
+    });
+});
+</script>
 {% endblock %}

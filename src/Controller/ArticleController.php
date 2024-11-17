@@ -2,18 +2,23 @@
 
 namespace App\Controller;
 
+use App\Entity\Article;
 use App\Entity\RSSFeed;
 use App\Repository\ArticleRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class ArticleController extends AbstractController
 {
+    private $entityManager;
     private $articleRepository;
 
-    public function __construct(ArticleRepository $articleRepository)
+    public function __construct(ArticleRepository $articleRepository, EntityManagerInterface $entityManager)
     {
+        $this->entityManager = $entityManager;
         $this->articleRepository = $articleRepository;
     }
 
@@ -43,5 +48,14 @@ class ArticleController extends AbstractController
         return $this->render('article/rss.html.twig', [
             'rssFeed' => $rssFeed,
         ]);
+    }
+
+    #[Route('/news/mark-as-read/{id}', name: 'app_article_mark_as_read', methods: ['POST'])]
+    public function markAsRead(Article $article): JsonResponse
+    {
+        $article->setRead(true);
+        $this->entityManager->flush();
+
+        return $this->json(['success' => true]);
     }
 }
