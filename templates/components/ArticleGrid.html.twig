@@ -1,4 +1,4 @@
-<div class="ArticleGrid" {{ attributes }}>
+<div class="ArticleGrid" {{ attributes.defaults(stimulus_controller('appear')) }}>
     <div id="results" class="grid grid-cols-1 gap-6">
         {% if page > 1 %}
             <div class="ArticleGrid_page" id="page--{{ page - 1 }}" data-live-ignore="true"></div>
@@ -16,18 +16,14 @@
                                 </div>
                             {% endif %}
                             {% if article.link %}
-                                <a href="{{ article.link }}" 
-                                   target="_blank" 
-                                   class="text-gray-400 hover:text-indigo-600">
+                                <a href="{{ article.link }}" target="_blank" class="text-gray-400 hover:text-indigo-600">
                                     <i class="fas fa-external-link-alt"></i>
                                 </a>
                             {% endif %}
                         </div>
 
                         <h3 class="text-xl font-bold text-gray-900">
-                            <a href="{{ article.link ?? '#' }}" 
-                               target="_blank"
-                               class="hover:text-indigo-600 transition-colors">
+                            <a href="{{ article.link ?? '#' }}" target="_blank" class="hover:text-indigo-600 transition-colors">
                                 {{ article.title ?? 'Sans titre' }}
                             </a>
                         </h3>
@@ -40,9 +36,7 @@
 
                         {% if article.link %}
                             <div class="pt-4 mt-auto">
-                                <a href="{{ article.link }}" 
-                                   target="_blank"
-                                   class="inline-flex items-center px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors group">
+                                <a href="{{ article.link }}" target="_blank" class="inline-flex items-center px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors group">
                                     Lire l'article complet
                                     <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
                                 </a>
@@ -53,14 +47,21 @@
             {% endfor %}
         </div>
 
-        <div class="flex justify-center mt-4">
-            {% if this.hasMore %}
-                <button data-action="live#action" data-live-action-param="more" class="btn btn-primary ArticleGrid_more">
-                    Charger plus
-                </button>
-            {% else %}
-                <span class="text-gray-500">Fin des articles</span>
-            {% endif %}
-        </div>
+        {% if this.hasMore %}
+            <div 
+                data-appear-target="loader"
+                data-action="appear->live#action"
+                data-live-action-param="debounce(350)|more"
+                class="loading-placeholder opacity-50 hover:opacity-70 transition-opacity duration-300"
+            >
+                <div class="animate-pulse bg-gray-200 h-32 rounded-xl mb-4"></div>
+                <div class="animate-pulse bg-gray-200 h-32 rounded-xl mb-4"></div>
+                <div class="animate-pulse bg-gray-200 h-32 rounded-xl"></div>
+            </div>
+        {% else %}
+            <div class="text-center py-8 text-gray-500">
+                Fin des articles
+            </div>
+        {% endif %}
     </div>
 </div>
