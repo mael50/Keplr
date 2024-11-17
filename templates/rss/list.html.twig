@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes flux RSS{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-8">Mes flux RSS</h1>
+    
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <ul class="divide-y divide-gray-200">
+            {% if rssFeeds|length == 0 %}
+                <li class="p-6 text-center text-gray-600">Aucun flux RSS n'a été ajouté pour le moment.</li>
+            {% else %}                
+                {% for feed in rssFeeds %}
+                    <li class="p-6 hover:bg-gray-50 transition-colors duration-200">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1 min-w-0">
+                                <h2 class="text-xl font-semibold text-gray-900 truncate">{{ feed.name }}</h2>
+                                <p class="mt-1 text-gray-600 text-sm">{{ feed.url }}</p>
+                            </div>
+                            <div class="flex items-center gap-3 ml-4">
+                                <!-- Bouton Ouvrir -->
+                                <a href="{{ feed.url }}" 
+                                target="_blank"
+                                class="inline-flex items-center px-3 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-colors duration-200">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                </a>
+
+                                <!-- Bouton Supprimer -->
+                                <a href="{{ path('app_rss_delete', {'id': feed.id}) }}"
+                                class="inline-flex items-center px-3 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors duration-200">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            {% endif %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
