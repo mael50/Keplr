@@ -4,10 +4,12 @@ namespace App\Controller;
 
 use App\Form\ToolType;
 use App\Form\RSSFeedType;
+use App\Form\GithubRepositoryType;
 use App\Repository\ToolRepository;
 use App\Repository\ArticleRepository;
 use App\Repository\RSSFeedRepository;
 use Symfony\Component\HttpFoundation\Request;
+use App\Repository\GithubRepositoryRepository;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,12 +19,18 @@ class IndexController extends AbstractController
     private $toolRepository;
     private $rssFeedRepository;
     private $articleRepository;
+    private $githubRepositoryRepository;
 
-    public function __construct(ToolRepository $toolRepository, RSSFeedRepository $rssFeedRepository, ArticleRepository $articleRepository)
-    {
+    public function __construct(
+        ToolRepository $toolRepository,
+        RSSFeedRepository $rssFeedRepository,
+        ArticleRepository $articleRepository,
+        GithubRepositoryRepository $githubRepositoryRepository
+    ) {
         $this->toolRepository = $toolRepository;
         $this->rssFeedRepository = $rssFeedRepository;
         $this->articleRepository = $articleRepository;
+        $this->githubRepositoryRepository = $githubRepositoryRepository;
     }
 
     #[Route('/', name: 'app_home')]
@@ -30,6 +38,7 @@ class IndexController extends AbstractController
     {
         $tools = $this->toolRepository->findAll();
         $rssFeeds = $this->rssFeedRepository->findAll();
+        $repositories = $this->githubRepositoryRepository->findAll();
 
         $articles = [];
         $dates = [];
@@ -68,13 +77,26 @@ class IndexController extends AbstractController
             ]);
         }
 
+        // FORMULAIRE POUR LES REPOS GITHUB
+        $githubRepoForm = $this->createForm(GithubRepositoryType::class);
+        $githubRepoForm->handleRequest($request);
+
+        if ($githubRepoForm->isSubmitted() && $githubRepoForm->isValid()) {
+            $githubRepo = $githubRepoForm->getData();
+            return $this->redirectToRoute('app_github_repo_add', [
+                'url' => $githubRepo->getUrl(),
+            ]);
+        }
+
 
         return $this->render('index/index.html.twig', [
             'toolForm' => $toolForm->createView(),
             'rssFeedForm' => $rssFeedForm->createView(),
+            'githubRepoForm' => $githubRepoForm->createView(),
             'tools' => $tools,
             'rssFeeds' => $rssFeeds,
             'articles' => $articles,
+            'repositories' => $repositories,
         ]);
     }
 }

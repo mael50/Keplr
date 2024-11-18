@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dernières releases GitHub{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-8 mt-8 sm:mt-0">Dernières releases GitHub</h1>
+
+    {% if repositories|length == 0 %}
+        <div class="text-center py-12">
+            <div class="text-gray-500">Aucun repository GitHub n'a été ajouté</div>
+        </div>
+    {% else %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% for repository in repositories %}
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    {# En-tête du repository #}
+                    <div class="bg-gray-50 border-b border-gray-200 px-6 py-4">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xl font-semibold text-gray-900">
+                                <a href="{{ repository.url }}" target="_blank" class="hover:text-indigo-600 transition-colors">
+                                    <i class="fab fa-github mr-2"></i>
+                                    {{ repository.owner }}/{{ repository.name }}
+                                </a>
+                            </h2>
+                        </div>
+                    </div>
+
+                    {# Liste des releases #}
+                    <div class="divide-y divide-gray-200 max-h-96 overflow-y-auto">
+                        {% set sortedReleases = repository.releases|sort((a, b) => b.updated <=> a.updated) %}
+                        {% for release in sortedReleases %}
+                            <div class="p-4 hover:bg-gray-50 transition-colors duration-200">
+                                <div class="flex flex-col gap-2">
+                                    <div class="flex justify-between items-start">
+                                        <h3 class="text-lg font-semibold text-gray-900">
+                                            {{ release.title }}
+                                        </h3>
+                                        <span class="text-sm text-gray-500">
+                                            <i class="far fa-clock mr-1"></i>
+                                            {{ release.updated|date('d/m/Y') }}
+                                        </span>
+                                    </div>
+                                    {% if release.content %}
+                                        <div class="text-gray-600 text-sm line-clamp-2">
+                                            {{ release.content|striptags|raw }}
+                                        </div>
+                                    {% endif %}
+                                    {% if release.url %}
+                                        <a href="{{ release.url }}" target="_blank" class="text-indigo-600 hover:underline transition-colors">
+                                            Voir la release
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}

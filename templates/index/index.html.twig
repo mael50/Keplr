@@ -3,11 +3,11 @@
 {% block title %}Accueil{% endblock %}
 
 {% block body %}
-<div class="flex min-h-screen">
+<div class="w-full">
     <!-- Contenu principal -->
     <div class="flex-1 ">
-        <div class="max-w-7xl mx-auto px-8 py-12">
-            <div class="bg-white rounded-2xl shadow-sm p-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-12">
+            <div class="bg-white rounded-2xl shadow-sm p-4 md:p-8">
                 <!-- En-tête -->
                 <div class="mb-8">
                     <h1 class="text-3xl font-bold text-gray-900">Tableau de bord</h1>
@@ -25,8 +25,83 @@
                         <div class="text-3xl font-bold mt-2">{{ rssFeeds|length }}</div>
                     </div>
                     <div class="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-6 text-white">
-                        <div class="text-sm font-semibold opacity-75">Versions suivies</div>
-                        <div class="text-3xl font-bold mt-2">12</div>
+                        <div class="text-sm font-semibold opacity-75">Repos GitHub suivis</div>
+                        <div class="text-3xl font-bold mt-2">{{ repositories|length }}</div>
+                    </div>
+                </div>
+
+                <!-- Section des formulaires -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 my-8">
+                    <!-- Formulaire Tool -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-12 h-12 flex items-center justify-center bg-indigo-100 rounded-xl">
+                                <i class="fas fa-tools text-xl text-indigo-600"></i>
+                            </div>
+                            <h2 class="text-xl font-semibold text-gray-900">Nouvel outil</h2>
+                        </div>
+                        {{ form_start(toolForm, {'attr': {'class': 'space-y-4'}}) }}
+                            <div>
+                                {{ form_widget(toolForm.url, {
+                                    'attr': {
+                                        'class': 'w-full p-2 rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500',
+                                        'placeholder': 'URL de l\'outil'
+                                    }
+                                }) }}
+                            </div>
+                            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+                                <i class="fas fa-plus mr-2"></i>
+                                Ajouter
+                            </button>
+                        {{ form_end(toolForm) }}
+                    </div>
+
+                    <!-- Formulaire RSS -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-12 h-12 flex items-center justify-center bg-emerald-100 rounded-xl">
+                                <i class="fas fa-rss text-xl text-emerald-600"></i>
+                            </div>
+                            <h2 class="text-xl font-semibold text-gray-900">Nouveau flux RSS</h2>
+                        </div>
+                        {{ form_start(rssFeedForm, {'attr': {'class': 'space-y-4'}}) }}
+                            <div>
+                                {{ form_widget(rssFeedForm.url, {
+                                    'attr': {
+                                        'class': 'w-full p-2 rounded-lg border-gray-300 focus:border-orange-500 focus:ring-orange-500',
+                                        'placeholder': 'URL du flux RSS'
+                                    }
+                                }) }}
+                            </div>
+                            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-200">
+                                <i class="fas fa-plus mr-2"></i>
+                                Ajouter
+                            </button>
+                        {{ form_end(rssFeedForm) }}
+                    </div>
+
+                    <!-- Formulaire Github -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-12 h-12 flex items-center justify-center bg-amber-100 rounded-xl">
+                                <i class="fab fa-github text-xl text-amber-600"></i>
+                            </div>
+                            <h2 class="text-xl font-semibold text-gray-900">Nouveau dépôt</h2>
+                        </div>
+                        {{ form_start(githubRepoForm, {'attr': {'class': 'space-y-4'}}) }}
+                            <div>
+                                {{ form_widget(githubRepoForm.url, {
+                                    'attr': {
+                                        'class': 'w-full p-2 rounded-lg border-gray-300 focus:border-gray-500 focus:ring-gray-500',
+                                        'placeholder': 'URL du dépôt GitHub'
+                                    }
+                                }) }}
+                            </div>
+                            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg text-sm font-medium text-white bg-amber-600 hover:bg-amber-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200">
+                                <i class="fas fa-plus mr-2"></i>
+                                Ajouter
+                            </button>
+                        {{ form_end(githubRepoForm) }}
                     </div>
                 </div>
 
@@ -96,61 +171,64 @@
                     {% endif %}
                 </div>
 
-                <!-- Formulaire Tool -->
-                <div class="bg-gray-50 rounded-xl p-6 my-4">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-6">Ajouter un nouvel outil</h2>
-                    {{ form_start(toolForm, {'attr': {'class': 'space-y-6'}}) }}
-                            <div class="space-y-2">
-                                {{ form_label(toolForm.url, null, {'label_attr': {'class': 'text-sm font-medium text-gray-700'}}) }}
-                                {{ form_widget(toolForm.url, {'attr': {
-                                    'class': 'mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
-                                }}) }}
-                                {{ form_errors(toolForm.url) }}
-                            </div>
-                        <div class="flex justify-end">
-                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
-                                <i class="fas fa-plus mr-2"></i>
-                                Ajouter l'outil
-                            </button>
-                        </div>
-                    {{ form_end(toolForm) }}
-                </div>
+                <!-- Récapitulatif des releases -->
+                <div class="bg-white rounded-xl shadow-lg p-6 my-4 transition-all duration-300 hover:shadow-xl">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900">Dernières releases GitHub</h2>
+                        <a href="{{ path('app_github_repos') }}" class="text-indigo-600 hover:text-indigo-700 font-medium text-sm">
+                            Voir toutes les releases <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
 
-                <!-- Formulaire RSS -->
-                 <div class="bg-gray-50 rounded-xl p-6 my-4">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-6">Ajouter un flux RSS</h2>
-                    {{ form_start(rssFeedForm, {'attr': {'class': 'space-y-6'}}) }}
-                            {# <div class="space-y-2">
-                                {{ form_label(rssFeedForm.name, null, {'label_attr': {'class': 'text-sm font-medium text-gray-700'}}) }}
-                                {{ form_widget(rssFeedForm.name, {'attr': {
-                                    'class': 'mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
-                                }}) }}
-                                {{ form_errors(rssFeedForm.name) }}
-                            </div> #}
-                            <div class="space-y-2">
-                                {{ form_label(rssFeedForm.url, null, {'label_attr': {'class': 'text-sm font-medium text-gray-700'}}) }}
-                                {{ form_widget(rssFeedForm.url, {'attr': {
-                                    'class': 'mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
-                                }}) }}
-                                {{ form_errors(rssFeedForm.url) }}
-                            </div>
-                        <div class="flex justify-end">
-                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
-                                <i class="fas fa-plus mr-2"></i>
-                                Ajouter le flux RSS
-                            </button>
+                    {% if repositories|length > 0 %}
+                        <div class="space-y-4">
+                            {% for repository in repositories|slice(0, 3) %}
+                                {% set latestRelease = repository.releases|sort((a, b) => b.updated <=> a.updated)|first %}
+                                {% if latestRelease %}
+                                    <div class="bg-gray-50 rounded-xl p-5 hover:bg-gray-100 transition-colors duration-200">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center gap-3">
+                                                <i class="fab fa-github text-gray-700"></i>
+                                                <a href="{{ repository.url }}" target="_blank" class="text-sm font-medium text-gray-700 hover:text-indigo-600">
+                                                    {{ repository.owner }}/{{ repository.name }}
+                                                </a>
+                                            </div>
+                                            <span class="text-xs text-gray-500">
+                                                <i class="far fa-clock mr-1"></i>
+                                                {{ latestRelease.updated|date('d/m/Y') }}
+                                            </span>
+                                        </div>
+                                        <h4 class="font-semibold text-gray-900 mb-2">
+                                            {{ latestRelease.title }}
+                                        </h4>
+                                        {% if latestRelease.content %}
+                                            <p class="text-sm text-gray-600 line-clamp-2">
+                                                {{ latestRelease.content|striptags }}
+                                            </p>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
                         </div>
-                    {{ form_end(rssFeedForm) }}
+                    {% else %}
+                        <div class="text-center py-8 text-gray-500">
+                            <p class="text-lg">Aucun repository GitHub ajouté</p>
+                        </div>
+                    {% endif %}
                 </div>
-
-                
             </div>
         </div>
     </div>
 </div>
 
 <style>
-    /* Animations subtiles */
+    .bg-white {
+        transform: translateY(0);
+        transition: all 0.3s ease;
+    }
+    .bg-white:hover {
+        transform: translateY(-4px);
+    }
     .bg-white {
         transition: transform 0.2s ease-in-out;
     }
@@ -166,7 +244,7 @@
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('turbo:load', function() {
     const dates = {{ dates|json_encode|raw }};
     let currentIndex = 0;
     const prevBtn = document.getElementById('prevDay');

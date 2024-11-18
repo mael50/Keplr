@@ -1,52 +1,110 @@
-<div class="fixed top-0 left-0 w-64 h-full bg-gradient-to-b from-gray-100 to-white text-gray-800 mr-8 shadow-lg">
-    <!-- Logo -->
-    <div class="p-4 border-b border-gray-200">
-        <img src="/logo_keplr.png" alt="Logo" class="mx-auto" style="width: 150px;">
+<div>
+    <!-- Bouton hamburger (mobile uniquement) -->
+    <button 
+        x-data
+        @click="$dispatch('toggle-sidebar')"
+        class="lg:hidden fixed top-4 left-4 z-20 p-2 rounded-lg bg-white shadow-lg">
+        <i class="fas fa-bars text-gray-600"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <div
+        x-data="{ open: false, activeMenu: null }"
+        @toggle-sidebar.window="open = !open"
+        :class="{'translate-x-0': open, '-translate-x-full': !open}"
+        class="fixed top-0 left-0 w-64 h-full bg-gradient-to-b from-gray-100 to-white text-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 z-10">
+        
+        <!-- Header mobile avec profil -->
+        <div class="lg:hidden p-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <img src="https://www.gravatar.com/avatar/{{ app.user.email }}?s=40&d=mp" 
+                         alt="Profile" 
+                         class="h-8 w-8 rounded-full border-2 border-gray-200">
+                    <span class="text-sm font-medium text-gray-700 truncate">{{ app.user.email }}</span>
+                </div>
+                <button 
+                    @click="open = false"
+                    class="p-2 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-times text-gray-600"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Logo -->
+        <div class="p-4 border-b border-gray-200">
+            <img src="/logo_keplr.png" alt="Logo" class="mx-auto" style="width: 150px;">
+        </div>
+
+        <!-- Navigation -->
+        <nav class="p-4 space-y-6">
+            <!-- Accueil -->
+            <div>
+                <a href="/" 
+                   class="flex items-center px-4 py-2 rounded-lg transition-colors {{ app.request.attributes.get('_route') == 'app_home' ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fas fa-home w-5"></i>
+                    <span class="ml-3">Tableau de bord</span>
+                </a>
+            </div>
+
+            <!-- Outils -->
+            <div class="space-y-2">
+                <div class="px-4 text-xs font-semibold text-gray-500 uppercase">Outils</div>
+                <a href="/tools" 
+                   class="flex items-center px-4 py-2 rounded-lg transition-colors {{ app.request.attributes.get('_route') == 'app_tools' ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fas fa-tools w-5"></i>
+                    <span class="ml-3">Catalogue des outils</span>
+                </a>
+            </div>
+
+            <!-- Actualités -->
+            <div class="space-y-2">
+                <div class="px-4 text-xs font-semibold text-gray-500 uppercase">Actualités</div>
+                <a href="/news" 
+                   class="flex items-center px-4 py-2 rounded-lg transition-colors relative {{ app.request.attributes.get('_route') == 'app_article' ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fas fa-newspaper w-5"></i>
+                    <span class="ml-3">Dernières actualités</span>
+                    {% if has_unread_articles() %}
+                        <span class="absolute right-2 flex h-3 w-3">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                        </span>
+                    {% endif %}
+                </a>
+                <a href="/rss" 
+                   class="flex items-center px-4 py-2 rounded-lg transition-colors {{ app.request.attributes.get('_route') == 'app_rss' ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fas fa-rss w-5"></i>
+                    <span class="ml-3">Flux RSS</span>
+                </a>
+            </div>
+
+            <!-- Versions -->
+            <div class="space-y-2">
+                <div class="px-4 text-xs font-semibold text-gray-500 uppercase">Versions</div>
+                <a href="/releases/latest" 
+                   class="flex items-center px-4 py-2 rounded-lg transition-colors {{ app.request.attributes.get('_route') == 'app_github_repos' ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fas fa-code-branch w-5"></i>
+                    <span class="ml-3">Dernières versions</span>
+                </a>
+            </div>
+
+            <!-- Menu déconnexion (mobile uniquement) -->
+            <div class="lg:hidden mt-auto pt-6 border-t border-gray-200">
+                <a href="{{ path('app_logout') }}" 
+                   class="flex items-center px-4 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors">
+                    <i class="fas fa-sign-out-alt w-5"></i>
+                    <span class="ml-3">Déconnexion</span>
+                </a>
+            </div>
+        </nav>
     </div>
 
-    <!-- Navigation -->
-    <nav class="p-4 space-y-6">
-        <!-- Accueil -->
-        <div>
-            <a href="/" class="flex items-center px-4 py-2 rounded-lg transition-colors {{ app.request.attributes.get('_route') == 'app_home' ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100' }}">
-                <i class="fas fa-home w-5"></i>
-                <span class="ml-3">Tableau de bord</span>
-            </a>
-        </div>
-
-        <!-- Outils -->
-        <div class="space-y-2">
-            <div class="px-4 text-xs font-semibold text-gray-500 uppercase">Outils</div>
-            <a href="/tools" class="flex items-center px-4 py-2 rounded-lg transition-colors {{ app.request.attributes.get('_route') == 'app_tools' ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100' }}">
-                <i class="fas fa-tools w-5"></i>
-                <span class="ml-3">Catalogue des outils</span>
-            </a>
-        </div>
-
-        <!-- Actualités -->
-        <div class="space-y-2">
-            <div class="px-4 text-xs font-semibold text-gray-500 uppercase">Actualités</div>
-            <a href="/news" class="flex items-center px-4 py-2 rounded-lg transition-colors {{ app.request.attributes.get('_route') == 'app_article' ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100' }}">
-                <i class="fas fa-newspaper w-5"></i>
-                <span class="ml-3">Dernières actualités</span>
-            </a>
-            <a href="/rss" class="flex items-center px-4 py-2 rounded-lg transition-colors {{ app.request.attributes.get('_route') == 'app_rss' ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100' }}">
-                <i class="fas fa-rss w-5"></i>
-                <span class="ml-3">Flux RSS</span>
-            </a>
-        </div>
-
-        <!-- Versions -->
-        <div class="space-y-2">
-            <div class="px-4 text-xs font-semibold text-gray-500 uppercase">Versions</div>
-            <a href="/releases/latest" class="flex items-center px-4 py-2 rounded-lg transition-colors {{ app.request.attributes.get('_route') == 'app_releases_latest' ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100' }}">
-                <i class="fas fa-code-branch w-5"></i>
-                <span class="ml-3">Dernières versions</span>
-            </a>
-            <a href="/releases/subscribed" class="flex items-center px-4 py-2 rounded-lg transition-colors {{ app.request.attributes.get('_route') == 'releases_subscribed' ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100' }}">
-                <i class="fas fa-star w-5"></i>
-                <span class="ml-3">Versions suivies</span>
-            </a>
-        </div>
-    </nav>
+    <!-- Overlay sombre pour mobile -->
+    <div
+        x-data
+        x-show="$store.sidebar.open"
+        @click="$dispatch('toggle-sidebar')"
+        class="fixed inset-0 bg-black bg-opacity-50 z-0 lg:hidden"
+        x-cloak>
+    </div>
 </div>
