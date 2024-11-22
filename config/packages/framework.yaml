@@ -5,6 +5,12 @@ framework:
 
     # Note that the session will be started ONLY if you read or write from it.
     session: true
+    router: 
+        strict_requirements: true
+    default_uri: 'https://keplrv2.maellaroque.fr'
+
+    trusted_proxies: ['127.0.0.1', 'REMOTE_IP', '172.16.0.0/12', '192.168.0.0/16', '10.0.0.0/8']
+    trusted_headers: ['X-Forwarded-For', 'X-Forwarded-Proto', 'X-Forwarded-Port', 'X-Forwarded-Host']
 
     #esi: true
     #fragments: true
