@@ -114,12 +114,7 @@
 <script>
 document.querySelectorAll('.mark-as-read').forEach(link => {
     link.addEventListener('click', function(e) {
-        e.preventDefault();
-        
         const articleId = this.dataset.articleId;
-        const articleLink = this.href;
-        const articleElement = this.closest('article');
-        const unreadDot = articleElement.querySelector('.relative.flex.h-4.w-4');
 
         fetch(`/news/mark-as-read/${articleId}`, {
             method: 'POST',
@@ -131,10 +126,12 @@ document.querySelectorAll('.mark-as-read').forEach(link => {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                const articleElement = this.closest('article');
+                const unreadDot = articleElement.querySelector('.relative.flex.h-4.w-4');
                 if (unreadDot) {
                     unreadDot.remove();
                 }
-                window.open(articleLink, '_blank');
+                // Laisser le comportement par défaut du lien se produire
             }
         })
         .catch(error => console.error('Erreur:', error));
