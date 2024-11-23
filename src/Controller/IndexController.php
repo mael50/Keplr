@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use App\Repository\GithubRepositoryRepository;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class IndexController extends AbstractController
@@ -97,6 +98,14 @@ class IndexController extends AbstractController
             'rssFeeds' => $rssFeeds,
             'articles' => $articles,
             'repositories' => $repositories,
+        ]);
+    }
+
+    #[Route('/api/user-status', name: 'api_user_status')]
+    public function userStatus(): JsonResponse
+    {
+        return new JsonResponse([
+            'isLoggedIn' => $this->getUser() !== null
         ]);
     }
 }
