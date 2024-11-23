@@ -4,13 +4,15 @@ namespace App\Command;
 
 use App\Entity\Release;
 use App\Entity\GithubRepository;
+use App\Entity\PushSubscription;
 use App\Repository\ReleaseRepository;
+use App\Service\PushNotificationService;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\GithubRepositoryRepository;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[AsCommand(
@@ -23,18 +25,21 @@ class FetchGithubReleasesCommand extends Command
     private HttpClientInterface $httpClient;
     private GithubRepositoryRepository $githubRepositoryRepository;
     private ReleaseRepository $releaseRepository;
+    private PushNotificationService $pushNotificationService;
 
     public function __construct(
         EntityManagerInterface $entityManager,
         HttpClientInterface $httpClient,
         GithubRepositoryRepository $githubRepositoryRepository,
-        ReleaseRepository $releaseRepository
+        ReleaseRepository $releaseRepository,
+        PushNotificationService $pushNotificationService
     ) {
         parent::__construct();
         $this->entityManager = $entityManager;
         $this->httpClient = $httpClient;
         $this->githubRepositoryRepository = $githubRepositoryRepository;
         $this->releaseRepository = $releaseRepository;
+        $this->pushNotificationService = $pushNotificationService;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -79,6 +84,24 @@ class FetchGithubReleasesCommand extends Command
                                 $repository->getName(),
                                 $release->getTitle()
                             ));
+
+                            $subscriptions = $this->entityManager
+                                ->getRepository(PushSubscription::class)
+                                ->findAll();
+
+                            foreach ($subscriptions as $subscription) {
+                                $this->pushNotificationService->sendNotification(
+                                    [
+                                        'endpoint' => $subscription->getEndpoint(),
+                                        'keys' => [
+                                            'p256dh' => $subscription->getP256dh(),
+                                            'auth' => $subscription->getAuth()
+                                        ]
+                                    ],
+                                    'Nouvelle release pour le repo : ' . $repository->getName(),
+                                    $release->getTitle()
+                                );
+                            }
                         }
                     }
 

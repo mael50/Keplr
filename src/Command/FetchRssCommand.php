@@ -2,14 +2,16 @@
 
 namespace App\Command;
 
+use App\Entity\Article;
+use App\Entity\RSSFeed;
+use App\Entity\PushSubscription;
+use App\Service\PushNotificationService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use App\Entity\RSSFeed;
-use App\Entity\Article;
 
 #[AsCommand(
     name: 'app:fetch-rss',
@@ -19,13 +21,15 @@ class FetchRssCommand extends Command
 {
     private EntityManagerInterface $entityManager;
     private HttpClientInterface $httpClient;
+    private PushNotificationService $pushNotificationService;
 
-    public function __construct(EntityManagerInterface $entityManager, HttpClientInterface $httpClient)
+    public function __construct(EntityManagerInterface $entityManager, HttpClientInterface $httpClient, PushNotificationService $pushNotificationService)
     {
         parent::__construct();
 
         $this->entityManager = $entityManager;
         $this->httpClient = $httpClient;
+        $this->pushNotificationService = $pushNotificationService;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -57,6 +61,24 @@ class FetchRssCommand extends Command
 
                         $this->entityManager->persist($article);
                         $this->entityManager->flush();
+
+                        $subscriptions = $this->entityManager
+                            ->getRepository(PushSubscription::class)
+                            ->findAll();
+
+                        foreach ($subscriptions as $subscription) {
+                            $this->pushNotificationService->sendNotification(
+                                [
+                                    'endpoint' => $subscription->getEndpoint(),
+                                    'keys' => [
+                                        'p256dh' => $subscription->getP256dh(),
+                                        'auth' => $subscription->getAuth()
+                                    ]
+                                ],
+                                'Nouvel article : ' . $rssFeed->getName(),
+                                $article->getTitle()
+                            );
+                        }
 
                         $output->writeln('Article ajouté: ' . $article->getTitle());
                     } else {
