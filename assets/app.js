@@ -27,32 +27,20 @@ async function initializeNotifications() {
         return;
     }
 
-    let swRegistration = null;
-
     try {
-        const handleUserInteraction = async () => {
-            await requestAndSubscribe();
-            window.removeEventListener('scroll', handleUserInteraction);
-            document.removeEventListener('click', handleUserInteraction);
-        };
-
-        // Sur mobile, on attend une interaction utilisateur
+        // Sur mobile, on attend un clic n'importe où sur la page
         if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-            const subscribeButton = document.getElementById('notificationSubscribeBtn');
-            if (!subscribeButton) {
-                // Créer le bouton s'il n'existe pas
-                const btn = document.createElement('button');
-                btn.id = 'notificationSubscribeBtn';
-                btn.textContent = 'Activer les notifications';
-                btn.classList.add('btn', 'btn-primary', 'mt-3');
-                document.querySelector('.container').appendChild(btn);
+            let notificationRequested = false;
 
-                btn.addEventListener('click', handleUserInteraction);
-            }
+            document.addEventListener('click', async () => {
+                if (!notificationRequested) {
+                    notificationRequested = true;
+                    await requestAndSubscribe();
+                }
+            }, { once: true }); // L'événement ne sera déclenché qu'une seule fois
         } else {
-            // Sur desktop, on peut demander après une interaction utilisateur
-            window.addEventListener('scroll', handleUserInteraction);
-            document.addEventListener('click', handleUserInteraction);
+            // Sur desktop, on peut demander directement
+            await requestAndSubscribe();
         }
     } catch (error) {
         console.error('Erreur lors de l\'initialisation des notifications:', error);
