@@ -59,14 +59,7 @@ async function requestAndSubscribe() {
         }
         console.log('3. Permission accordée');
 
-        // Désinscription du Service Worker existant si présent
-        const existingRegistration = await navigator.serviceWorker.getRegistration();
-        if (existingRegistration) {
-            console.log('Service Worker existant trouvé, désinstallation...');
-            await existingRegistration.unregister();
-        }
-
-        // Enregistrer le nouveau Service Worker
+        // Enregistrer le Service Worker
         console.log('4. Tentative d\'enregistrement du Service Worker...');
         const registration = await navigator.serviceWorker.register('/sw.js', {
             scope: '/',
@@ -74,48 +67,24 @@ async function requestAndSubscribe() {
         });
         console.log('5. Service Worker enregistré:', registration.scope);
 
-        // Attendre l'activation avec timeout
-        await new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => {
-                reject(new Error('Timeout d\'activation du Service Worker'));
-            }, 10000); // 10 secondes de timeout
+        // Attendre l'activation
+        await navigator.serviceWorker.ready;
+        console.log('6. Service Worker activé');
 
-            const serviceWorker = registration.installing || registration.waiting || registration.active;
-
-            if (registration.active) {
-                clearTimeout(timeout);
-                resolve();
-                return;
-            }
-
-            serviceWorker.addEventListener('statechange', function () {
-                console.log('État du Service Worker:', this.state);
-                if (this.state === 'activated') {
-                    clearTimeout(timeout);
-                    resolve();
-                } else if (this.state === 'redundant') {
-                    clearTimeout(timeout);
-                    reject(new Error('Service Worker devenu redondant'));
-                }
-            });
-        });
-
-        console.log('7. Service Worker activé et prêt');
-
-        // Suite du code inchangée...
+        // Vérifier l'abonnement existant
         const subscription = await registration.pushManager.getSubscription();
         if (subscription) {
-            console.log('8. Abonnement existant trouvé');
+            console.log('7. Abonnement existant trouvé');
             return subscription;
         }
 
-        console.log('9. Création d\'un nouvel abonnement...');
+        console.log('8. Création d\'un nouvel abonnement...');
         const newSubscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: urlBase64ToUint8Array('BEhGplSNE_lmI07MuwyIMb5IN53Exd8DPsEqwdLrfjBNhCMrSb87yCHZ5E7cHtIwMrpvFhoWZXsf5zUb2xZ5dXs')
         });
 
-        console.log('10. Sauvegarde de l\'abonnement...');
+        console.log('9. Sauvegarde de l\'abonnement...');
         await saveSubscription(newSubscription);
 
         return newSubscription;

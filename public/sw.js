@@ -7,10 +7,16 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', event => {
+    console.log('[ServiceWorker] Installation...');
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
+                console.log('[ServiceWorker] Mise en cache globale');
                 return cache.addAll(urlsToCache);
+            })
+            .then(() => {
+                console.log('[ServiceWorker] Installation terminée');
+                return self.skipWaiting();
             })
     );
 });
@@ -46,17 +52,24 @@ self.addEventListener('fetch', event => {
     );
 });
 
-// Nettoyer les anciens caches
 self.addEventListener('activate', event => {
+    console.log('[ServiceWorker] Activation...');
     event.waitUntil(
-        caches.keys().then(cacheNames => {
-            return Promise.all(
-                cacheNames.map(cacheName => {
-                    if (cacheName !== CACHE_NAME) {
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
+        Promise.all([
+            // Nettoyage des anciens caches
+            caches.keys().then(cacheNames => {
+                return Promise.all(
+                    cacheNames.map(cacheName => {
+                        if (cacheName !== CACHE_NAME) {
+                            return caches.delete(cacheName);
+                        }
+                    })
+                );
+            }),
+            // Prise de contrôle immédiate
+            self.clients.claim()
+        ]).then(() => {
+            console.log('[ServiceWorker] Activation terminée');
         })
     );
 });
