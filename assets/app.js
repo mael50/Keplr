@@ -66,44 +66,42 @@ async function requestAndSubscribe() {
         });
         console.log('5. Service Worker enregistré:', registration.scope);
 
-        // Attendre que le Service Worker soit activé
-        console.log('6. Attente de l\'activation du Service Worker...');
-        const activeRegistration = await navigator.serviceWorker.ready;
-        console.log('7. Service Worker activé:', activeRegistration.active ? 'Oui' : 'Non');
-
-        // Vérifier l'état du Service Worker
-        if (registration.installing) {
-            console.log('8a. Service Worker en cours d\'installation');
-        } else if (registration.waiting) {
-            console.log('8b. Service Worker en attente d\'activation');
-        } else if (registration.active) {
-            console.log('8c. Service Worker actif');
+        // Attendre l'activation du Service Worker de manière explicite
+        if (registration.installing || registration.waiting) {
+            await new Promise((resolve, reject) => {
+                const serviceWorker = registration.installing || registration.waiting;
+                serviceWorker.addEventListener('statechange', function () {
+                    if (this.state === 'activated') {
+                        console.log('Service Worker activé avec succès');
+                        resolve();
+                    } else if (this.state === 'redundant') {
+                        reject(new Error('Service Worker devenu redondant'));
+                    }
+                });
+            });
         }
 
-        // Vérifier l'abonnement existant
-        console.log('9. Vérification de l\'abonnement existant...');
-        const subscription = await registration.pushManager.getSubscription();
+        console.log('7. Service Worker prêt');
 
+        // Vérifier l'abonnement existant
+        const subscription = await registration.pushManager.getSubscription();
         if (subscription) {
-            console.log('10a. Abonnement existant trouvé');
+            console.log('8. Abonnement existant trouvé');
             return subscription;
         }
 
-        console.log('10b. Création d\'un nouvel abonnement...');
+        console.log('9. Création d\'un nouvel abonnement...');
         const newSubscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: urlBase64ToUint8Array('BEhGplSNE_lmI07MuwyIMb5IN53Exd8DPsEqwdLrfjBNhCMrSb87yCHZ5E7cHtIwMrpvFhoWZXsf5zUb2xZ5dXs')
         });
-        console.log('11. Nouvel abonnement créé:', newSubscription);
 
-        console.log('12. Tentative de sauvegarde de l\'abonnement...');
+        console.log('10. Sauvegarde de l\'abonnement...');
         await saveSubscription(newSubscription);
-        console.log('13. Abonnement sauvegardé avec succès');
 
         return newSubscription;
     } catch (error) {
-        console.error('Erreur détaillée dans requestAndSubscribe:', error);
-        console.error('Stack trace:', error.stack);
+        console.error('Erreur détaillée:', error);
         throw error;
     }
 }
