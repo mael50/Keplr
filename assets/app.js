@@ -30,6 +30,12 @@ async function initializeNotifications() {
     let swRegistration = null;
 
     try {
+        const handleUserInteraction = async () => {
+            await requestAndSubscribe();
+            window.removeEventListener('scroll', handleUserInteraction);
+            document.removeEventListener('click', handleUserInteraction);
+        };
+
         // Sur mobile, on attend une interaction utilisateur
         if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
             const subscribeButton = document.getElementById('notificationSubscribeBtn');
@@ -41,13 +47,12 @@ async function initializeNotifications() {
                 btn.classList.add('btn', 'btn-primary', 'mt-3');
                 document.querySelector('.container').appendChild(btn);
 
-                btn.addEventListener('click', async () => {
-                    await requestAndSubscribe();
-                });
+                btn.addEventListener('click', handleUserInteraction);
             }
         } else {
-            // Sur desktop, on peut demander directement
-            await requestAndSubscribe();
+            // Sur desktop, on peut demander après une interaction utilisateur
+            window.addEventListener('scroll', handleUserInteraction);
+            document.addEventListener('click', handleUserInteraction);
         }
     } catch (error) {
         console.error('Erreur lors de l\'initialisation des notifications:', error);
