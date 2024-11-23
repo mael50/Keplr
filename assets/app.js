@@ -54,15 +54,22 @@ async function requestAndSubscribe() {
             throw new Error('Permission refusée');
         }
 
+        // Enregistrer le Service Worker
         const registration = await navigator.serviceWorker.register('/sw.js');
         console.log('Service Worker enregistré:', registration.scope);
 
+        // Attendre que le Service Worker soit activé
+        await navigator.serviceWorker.ready;
+        console.log('Service Worker activé');
+
+        // Vérifier l'abonnement existant
         const subscription = await registration.pushManager.getSubscription();
         if (subscription) {
             console.log('Déjà abonné');
             return subscription;
         }
 
+        // S'abonner aux notifications
         const newSubscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: urlBase64ToUint8Array('BEhGplSNE_lmI07MuwyIMb5IN53Exd8DPsEqwdLrfjBNhCMrSb87yCHZ5E7cHtIwMrpvFhoWZXsf5zUb2xZ5dXs')
@@ -70,10 +77,6 @@ async function requestAndSubscribe() {
 
         await saveSubscription(newSubscription);
         console.log('Abonnement sauvegardé');
-
-        // Cacher le bouton après l'abonnement sur mobile
-        const btn = document.getElementById('notificationSubscribeBtn');
-        if (btn) btn.style.display = 'none';
 
         return newSubscription;
     } catch (error) {
