@@ -59,31 +59,50 @@ async function requestAndSubscribe() {
         }
         console.log('3. Permission accordée');
 
-        // Enregistrer le Service Worker
+        // Désinscription du Service Worker existant si présent
+        const existingRegistration = await navigator.serviceWorker.getRegistration();
+        if (existingRegistration) {
+            console.log('Service Worker existant trouvé, désinstallation...');
+            await existingRegistration.unregister();
+        }
+
+        // Enregistrer le nouveau Service Worker
         console.log('4. Tentative d\'enregistrement du Service Worker...');
         const registration = await navigator.serviceWorker.register('/sw.js', {
-            scope: '/'
+            scope: '/',
+            updateViaCache: 'none'
         });
         console.log('5. Service Worker enregistré:', registration.scope);
 
-        // Attendre l'activation du Service Worker de manière explicite
-        if (registration.installing || registration.waiting) {
-            await new Promise((resolve, reject) => {
-                const serviceWorker = registration.installing || registration.waiting;
-                serviceWorker.addEventListener('statechange', function () {
-                    if (this.state === 'activated') {
-                        console.log('Service Worker activé avec succès');
-                        resolve();
-                    } else if (this.state === 'redundant') {
-                        reject(new Error('Service Worker devenu redondant'));
-                    }
-                });
+        // Attendre l'activation avec timeout
+        await new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => {
+                reject(new Error('Timeout d\'activation du Service Worker'));
+            }, 10000); // 10 secondes de timeout
+
+            const serviceWorker = registration.installing || registration.waiting || registration.active;
+
+            if (registration.active) {
+                clearTimeout(timeout);
+                resolve();
+                return;
+            }
+
+            serviceWorker.addEventListener('statechange', function () {
+                console.log('État du Service Worker:', this.state);
+                if (this.state === 'activated') {
+                    clearTimeout(timeout);
+                    resolve();
+                } else if (this.state === 'redundant') {
+                    clearTimeout(timeout);
+                    reject(new Error('Service Worker devenu redondant'));
+                }
             });
-        }
+        });
 
-        console.log('7. Service Worker prêt');
+        console.log('7. Service Worker activé et prêt');
 
-        // Vérifier l'abonnement existant
+        // Suite du code inchangée...
         const subscription = await registration.pushManager.getSubscription();
         if (subscription) {
             console.log('8. Abonnement existant trouvé');
