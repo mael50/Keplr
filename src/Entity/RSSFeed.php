@@ -24,7 +24,7 @@ class RSSFeed
     /**
      * @var Collection<int, Article>
      */
-    #[ORM\OneToMany(targetEntity: Article::class, mappedBy: 'RssFeed')]
+    #[ORM\OneToMany(targetEntity: Article::class, mappedBy: 'RssFeed', cascade: ['persist', 'remove'])]
     private Collection $articles;
 
     public function __construct()
