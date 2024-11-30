@@ -22,19 +22,20 @@ class ArticleController extends AbstractController
         $this->articleRepository = $articleRepository;
     }
 
-
     #[Route('/news', name: 'app_article')]
     public function index(): Response
     {
-        $articles = $this->articleRepository->findAll();
+        $user = $this->getUser();
+
+        $userRssFeeds = $user->getRSSFeeds();
 
         $articlesByRssFeed = [];
-        foreach ($articles as $article) {
-            $rssFeedName = $article->getRssFeed()->getName();
-            if (!isset($articlesByRssFeed[$rssFeedName])) {
-                $articlesByRssFeed[$rssFeedName] = [];
+        foreach ($userRssFeeds as $rssFeed) {
+            $articles = $this->articleRepository->findByRssFeed($rssFeed);
+
+            if (!empty($articles)) {
+                $articlesByRssFeed[$rssFeed->getName()] = $articles;
             }
-            $articlesByRssFeed[$rssFeedName][] = $article;
         }
 
         return $this->render('article/list.html.twig', [

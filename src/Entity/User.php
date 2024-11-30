@@ -47,10 +47,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Tool::class, mappedBy: 'user')]
     private Collection $tools;
 
+    /**
+     * @var Collection<int, RSSFeed>
+     */
+    #[ORM\OneToMany(targetEntity: RSSFeed::class, mappedBy: 'user')]
+    private Collection $rSSFeeds;
+
     public function __construct()
     {
         $this->pushSubscriptions = new ArrayCollection();
         $this->tools = new ArrayCollection();
+        $this->rSSFeeds = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -182,6 +189,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($tool->getUser() === $this) {
                 $tool->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RSSFeed>
+     */
+    public function getRSSFeeds(): Collection
+    {
+        return $this->rSSFeeds;
+    }
+
+    public function addRSSFeed(RSSFeed $rSSFeed): static
+    {
+        if (!$this->rSSFeeds->contains($rSSFeed)) {
+            $this->rSSFeeds->add($rSSFeed);
+            $rSSFeed->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRSSFeed(RSSFeed $rSSFeed): static
+    {
+        if ($this->rSSFeeds->removeElement($rSSFeed)) {
+            // set the owning side to null (unless already changed)
+            if ($rSSFeed->getUser() === $this) {
+                $rSSFeed->setUser(null);
             }
         }
 

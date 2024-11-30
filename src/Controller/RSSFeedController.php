@@ -28,7 +28,7 @@ class RSSFeedController extends AbstractController
     #[Route('/rss', name: 'app_rss')]
     public function index()
     {
-        $rssFeeds = $this->rssFeedRepository->findAll();
+        $rssFeeds = $this->rssFeedRepository->findBy(['user' => $this->getUser()]);
 
         return $this->render('rss/list.html.twig', [
             'rssFeeds' => $rssFeeds,
@@ -75,6 +75,7 @@ class RSSFeedController extends AbstractController
             $rssFeed = new RSSFeed();
             $rssFeed->setUrl($data['url']);
             $rssFeed->setName($data['name']);
+            $rssFeed->setUser($this->getUser());
         }
 
         $this->em->persist($rssFeed);

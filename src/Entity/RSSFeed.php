@@ -27,6 +27,9 @@ class RSSFeed
     #[ORM\OneToMany(targetEntity: Article::class, mappedBy: 'RssFeed', cascade: ['persist', 'remove'])]
     private Collection $articles;
 
+    #[ORM\ManyToOne(inversedBy: 'rSSFeeds')]
+    private ?User $user = null;
+
     public function __construct()
     {
         $this->articles = new ArrayCollection();
@@ -87,6 +90,18 @@ class RSSFeed
                 $article->setRssFeed(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
 
         return $this;
     }

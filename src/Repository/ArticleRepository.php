@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\User;
 use App\Entity\Article;
 use App\Entity\RSSFeed;
 use Doctrine\Persistence\ManagerRegistry;
