@@ -32,7 +32,7 @@ class ToolController extends AbstractController
     #[Route('/tools', name: 'app_tools')]
     public function show(): Response
     {
-        $tools = $this->toolRepository->findAll();
+        $tools = $this->toolRepository->findBy(['user' => $this->getUser()]);
 
         usort($tools, function ($a, $b) {
             return $b->getId() <=> $a->getId();
