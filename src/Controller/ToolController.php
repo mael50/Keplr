@@ -77,6 +77,7 @@ class ToolController extends AbstractController
         $tool->setName($info->title);
         $tool->setDescription($info->description);
         $tool->setCover($info->image);
+        $tool->setUser($this->getUser());
 
         $categoryName = $this->getSuggestedCategory($info->description);
         $category = $this->categoryRepository->findOneBy(['name' => $categoryName]);

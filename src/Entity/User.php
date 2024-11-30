@@ -41,9 +41,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: PushSubscription::class, mappedBy: 'user')]
     private Collection $pushSubscriptions;
 
+    /**
+     * @var Collection<int, Tool>
+     */
+    #[ORM\OneToMany(targetEntity: Tool::class, mappedBy: 'user')]
+    private Collection $tools;
+
     public function __construct()
     {
         $this->pushSubscriptions = new ArrayCollection();
+        $this->tools = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -145,6 +152,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($pushSubscription->getUser() === $this) {
                 $pushSubscription->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Tool>
+     */
+    public function getTools(): Collection
+    {
+        return $this->tools;
+    }
+
+    public function addTool(Tool $tool): static
+    {
+        if (!$this->tools->contains($tool)) {
+            $this->tools->add($tool);
+            $tool->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTool(Tool $tool): static
+    {
+        if ($this->tools->removeElement($tool)) {
+            // set the owning side to null (unless already changed)
+            if ($tool->getUser() === $this) {
+                $tool->setUser(null);
             }
         }
 
