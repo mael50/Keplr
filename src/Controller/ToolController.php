@@ -72,6 +72,17 @@ class ToolController extends AbstractController
             return $this->redirectToRoute('app_home');
         }
 
+        $tools = $this->toolRepository->findBy(['user' => $this->getUser()]);
+        if (count($tools) >= 25) {
+            $this->addFlash('warning', 'Vous avez atteint la limite de 25 outils. Vous ne pouvez pas en ajouter plus.');
+            return $this->redirectToRoute('app_home');
+        }
+
+        if (!$info->description || !$info->title) {
+            $this->addFlash('warning', 'Impossible de récupérer les informations de la page. Veuillez vérifier l\'URL.');
+            return $this->redirectToRoute('app_home');
+        }
+
         $tool = new Tool();
         $tool->setUrl($url);
         $tool->setName($info->title);

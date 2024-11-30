@@ -29,6 +29,13 @@
             {% include 'partials/header.html.twig' %}
         {% endif %}
         <main class="flex-1 w-full min-h-screen ml-0 md:ml-64">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+            <div style="padding: 1rem; margin-bottom: 1rem; font-size: 0.875rem; color: {{ label == 'success' ? '#065f46' : (label == 'error' ? '#991b1b' : '#92400e') }}; background-color: {{ label == 'success' ? '#d1fae5' : (label == 'error' ? '#fee2e2' : '#fffbeb') }}; border-radius: 0.5rem;" role="alert">
+                {{ message }}
+            </div>
+            {% endfor %}
+        {% endfor %}
             <div class="p-4 md:p-8">
                 {% block body %}
                 {% endblock %}
