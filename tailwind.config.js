@@ -7,7 +7,11 @@ module.exports = {
     './templates/**/*.twig',
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: ['"Bricolage Grotesque"', 'sans-serif'],
+      },
+    },
   },
   plugins: [
   ],
