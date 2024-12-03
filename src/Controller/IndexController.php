@@ -47,7 +47,6 @@ class IndexController extends AbstractController
             $feedArticles = $this->articleRepository->findByRssFeed($rssFeed);
             foreach ($feedArticles as $article) {
                 $date = $article->getPubDate()->format('Y-m-d');
-                $articles[$date][$rssFeed->getName()][] = $article;
                 if (!in_array($date, $dates)) {
                     $dates[] = $date;
                 }
@@ -96,7 +95,7 @@ class IndexController extends AbstractController
             'githubRepoForm' => $githubRepoForm->createView(),
             'tools' => $tools,
             'rssFeeds' => $rssFeeds,
-            'articles' => $articles,
+            'dates' => $dates,
             'repositories' => $repositories,
         ]);
     }
@@ -107,5 +106,33 @@ class IndexController extends AbstractController
         return new JsonResponse([
             'isLoggedIn' => $this->getUser() !== null
         ]);
+    }
+
+    #[Route('/api/articles/{date}', name: 'api_articles_by_date')]
+    public function getArticlesByDate(string $date): JsonResponse
+    {
+        $rssFeeds = $this->rssFeedRepository->findAll();
+        $articles = [];
+
+        foreach ($rssFeeds as $rssFeed) {
+            $feedArticles = $this->articleRepository->findByRssFeed($rssFeed);
+            foreach ($feedArticles as $article) {
+                if ($article->getPubDate()->format('Y-m-d') === $date) {
+                    $description = $article->getDescription();
+                    $description = strip_tags($description);
+                    $description = substr($description, 0, 100) . '...';
+                    $articles[$rssFeed->getName()][] = [
+                        'id' => $article->getId(),
+                        'title' => $article->getTitle(),
+                        'link' => $article->getLink(),
+                        'pubDate' => $article->getPubDate()->format('H:i'),
+                        'isRead' => $article->isRead(),
+                        'description' => $description,
+                    ];
+                }
+            }
+        }
+
+        return new JsonResponse($articles);
     }
 }
