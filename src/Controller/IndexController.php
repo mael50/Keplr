@@ -37,9 +37,9 @@ class IndexController extends AbstractController
     #[Route('/', name: 'app_home')]
     public function index(Request $request): Response
     {
-        $tools = $this->toolRepository->findAll();
-        $rssFeeds = $this->rssFeedRepository->findAll();
-        $repositories = $this->githubRepositoryRepository->findAll();
+        $tools = $this->toolRepository->findBy(['user' => $this->getUser()]);
+        $rssFeeds = $this->rssFeedRepository->findBy(['user' => $this->getUser()]);
+        $repositories = $this->githubRepositoryRepository->findBy(['user' => $this->getUser()]);
 
         $articles = [];
         $dates = [];
