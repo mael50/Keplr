@@ -96,6 +96,7 @@ class ToolController extends AbstractController
 
         if (!$category) {
             $category = new Category();
+            $category->setUser($this->getUser());
             $category->setName($categoryName);
             $this->em->persist($category);
         }

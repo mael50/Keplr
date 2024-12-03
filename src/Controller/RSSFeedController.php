@@ -57,6 +57,7 @@ class RSSFeedController extends AbstractController
 
             $rssFeed = new RSSFeed();
             $rssFeed->setUrl($url);
+            $rssFeed->setUser($this->getUser());
 
             if ($rss === false || !isset($rss->channel->title)) {
                 $rssFeed->setName('Flux RSS sans titre');
