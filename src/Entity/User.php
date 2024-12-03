@@ -53,11 +53,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: RSSFeed::class, mappedBy: 'user')]
     private Collection $rSSFeeds;
 
+    /**
+     * @var Collection<int, GithubRepository>
+     */
+    #[ORM\OneToMany(targetEntity: GithubRepository::class, mappedBy: 'user')]
+    private Collection $githubRepositories;
+
+    /**
+     * @var Collection<int, Category>
+     */
+    #[ORM\OneToMany(targetEntity: Category::class, mappedBy: 'user')]
+    private Collection $categories;
+
     public function __construct()
     {
         $this->pushSubscriptions = new ArrayCollection();
         $this->tools = new ArrayCollection();
         $this->rSSFeeds = new ArrayCollection();
+        $this->githubRepositories = new ArrayCollection();
+        $this->categories = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -219,6 +233,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($rSSFeed->getUser() === $this) {
                 $rSSFeed->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, GithubRepository>
+     */
+    public function getGithubRepositories(): Collection
+    {
+        return $this->githubRepositories;
+    }
+
+    public function addGithubRepository(GithubRepository $githubRepository): static
+    {
+        if (!$this->githubRepositories->contains($githubRepository)) {
+            $this->githubRepositories->add($githubRepository);
+            $githubRepository->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGithubRepository(GithubRepository $githubRepository): static
+    {
+        if ($this->githubRepositories->removeElement($githubRepository)) {
+            // set the owning side to null (unless already changed)
+            if ($githubRepository->getUser() === $this) {
+                $githubRepository->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Category>
+     */
+    public function getCategories(): Collection
+    {
+        return $this->categories;
+    }
+
+    public function addCategory(Category $category): static
+    {
+        if (!$this->categories->contains($category)) {
+            $this->categories->add($category);
+            $category->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCategory(Category $category): static
+    {
+        if ($this->categories->removeElement($category)) {
+            // set the owning side to null (unless already changed)
+            if ($category->getUser() === $this) {
+                $category->setUser(null);
             }
         }
 

@@ -39,6 +39,9 @@ class GithubRepository
     )]
     private Collection $releases;
 
+    #[ORM\ManyToOne(inversedBy: 'githubRepositories')]
+    private ?User $user = null;
+
     public function __construct()
     {
         $this->releases = new ArrayCollection();
@@ -135,6 +138,18 @@ class GithubRepository
                 $release->setGithubRepo(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
 
         return $this;
     }

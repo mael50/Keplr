@@ -25,7 +25,7 @@ class GithubRepositoryController extends AbstractController
     #[Route('/releases/latest', name: 'app_github_repos')]
     public function show(): Response
     {
-        $repositories = $this->githubRepositoryRepository->findAll();
+        $repositories = $this->githubRepositoryRepository->findBy(['user' => $this->getUser()]);
 
         return $this->render('github_repository/list.html.twig', [
             'repositories' => $repositories,
@@ -61,6 +61,7 @@ class GithubRepositoryController extends AbstractController
         $repository->setOwner($owner);
         $repository->setName($name);
         $repository->setUrl($url);
+        $repository->setUser($this->getUser());
 
         $feedUrl = $url . '/releases.atom';
 

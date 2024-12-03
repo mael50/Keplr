@@ -24,6 +24,9 @@ class Category
     #[ORM\ManyToMany(targetEntity: Tool::class, inversedBy: 'categories')]
     private Collection $tools;
 
+    #[ORM\ManyToOne(inversedBy: 'categories')]
+    private ?User $user = null;
+
     public function __construct()
     {
         $this->tools = new ArrayCollection();
@@ -66,6 +69,18 @@ class Category
     public function removeTool(Tool $tool): static
     {
         $this->tools->removeElement($tool);
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
 
         return $this;
     }

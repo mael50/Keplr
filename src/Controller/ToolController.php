@@ -128,6 +128,8 @@ class ToolController extends AbstractController
         $apiUrl = 'https://api.anthropic.com/v1/messages';
         $apiKey = $_ENV['ANTHROPIC_API_KEY'];
 
+        $userCategories = $this->categoryRepository->findBy(['user' => $this->getUser()]);
+
 
         $response = $this->httpClient->request('POST', $apiUrl, [
             'headers' => [
@@ -140,7 +142,7 @@ class ToolController extends AbstractController
                 'messages' => [
                     [
                         'role' => 'user',
-                        'content' => 'Suggérez une catégorie en un seul mot pour la description suivante : ' . $description
+                        'content' => 'Suggérez une catégorie en un seul mot pour la description suivante : ' . $description . 'ou choisis en un dans la liste : ' . implode(', ', array_map(fn($category) => $category->getName(), $userCategories))
                     ]
                 ],
                 'max_tokens' => 10
