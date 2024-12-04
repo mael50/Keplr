@@ -66,7 +66,7 @@ class ToolController extends AbstractController
 
         $info = $embed->get($url);
 
-        $existingTool = $this->toolRepository->findOneBy(['url' => $url]);
+        $existingTool = $this->toolRepository->findOneBy(['url' => $url, 'user' => $this->getUser()]);
 
         if ($existingTool) {
             return $this->redirectToRoute('app_home');
@@ -143,10 +143,13 @@ class ToolController extends AbstractController
                 'messages' => [
                     [
                         'role' => 'user',
-                        'content' => 'Suggérez une catégorie en un seul mot pour la description suivante : ' . $description . 'ou choisis en un dans la liste : ' . implode(', ', array_map(fn($category) => $category->getName(), $userCategories))
+                        'content' => 'Suggérez une catégorie en **un seul mot** pour la description suivante : ' . $description .
+                            ' ou choisissez-en un dans la liste suivante : ' .
+                            implode(', ', array_map(fn($category) => $category->getName(), $userCategories)) .
+                            '. Répondez uniquement avec un seul mot sans explication.'
                     ]
                 ],
-                'max_tokens' => 10
+                'max_tokens' => 5,
             ],
         ]);
 
