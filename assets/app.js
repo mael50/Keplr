@@ -21,7 +21,12 @@ async function initializeNotifications() {
     }
 
     // Vérifie d'abord si l'utilisateur est connecté
-    const loggedIn = await isLoggedIn();
+    // si la route n'est pas /login ou /register
+    if (!['/login', '/register'].includes(window.location.pathname)) {
+        const loggedIn = await isLoggedIn();
+    } else {
+        const loggedIn = false;
+    }
     if (!loggedIn) {
         console.log('Utilisateur non connecté, notifications désactivées');
         return;
