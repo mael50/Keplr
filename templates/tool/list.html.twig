@@ -9,14 +9,17 @@
             {% endif %}
         {% endfor %}
     {% endfor %}
-    <div class="container mx-auto px-4 py-8">
+    <div 
+        data-controller="tools-filter"
+        class="container mx-auto px-4 py-8"
+    >
         <h1 class="text-4xl font-bold mb-8 mt-8 sm:mt-0">Catalogue des outils</h1>
         <!-- Barre de recherche -->
         <div class="mb-8">
             <div class="relative my-4">
                 <input 
-                    type="text" 
-                    id="search-input"
+                    data-tools-filter-target="searchInput"
+                    data-action="input->tools-filter#search"
                     placeholder="Rechercher un outil..." 
                     class="w-full px-4 py-2 pl-10 pr-4 rounded-lg border-2 border-gray-200 focus:border-indigo-600 focus:outline-none"
                 >
@@ -31,22 +34,41 @@
             <div class="relative">
                 {% set tools = tools|sort((a, b) => a.name|lower <=> b.name|lower) %}
 
-                <button id="category-dropdown" class="flex items-center justify-between w-full md:w-64 px-4 py-2 text-left bg-white border-2 border-gray-200 rounded-lg focus:outline-none focus:border-indigo-600">
-                    <span class="font-semibold flex-1 truncate" id="dropdown-label">
+                <button 
+                    id="category-dropdown" 
+                    class="flex items-center justify-between w-full md:w-64 px-4 py-2 text-left bg-white border-2 border-gray-200 rounded-lg focus:outline-none focus:border-indigo-600"
+                    data-tools-filter-target="dropdown"
+                    data-action="click->tools-filter#toggleDropdown"
+                >
+                    <span 
+                        class="font-semibold flex-1 truncate" 
+                        id="dropdown-label"
+                        data-tools-filter-target="dropdownLabel"
+                    >
                         Filtrer par catégories
                     </span>
-                    <span class="ml-2 bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full text-xs" id="selected-count"></span>
+                    <span 
+                        class="ml-2 bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full text-xs" 
+                        id="selected-count"
+                        data-tools-filter-target="selectedCount"
+                    ></span>
                     <svg class="w-5 h-5 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
 
-                <div id="category-menu" class="hidden absolute z-50 w-full md:w-64 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                <div 
+                    id="category-menu" 
+                    class="hidden absolute z-50 w-full md:w-64 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+                    data-tools-filter-target="menu"
+                >
                     <div class="sticky top-0 bg-white p-2 border-b">
                         <div class="relative">
                             <input 
                                 type="text" 
                                 id="category-search"
+                                data-tools-filter-target="categorySearch"
+                                data-action="input->tools-filter#searchCategory"
                                 placeholder="Rechercher une catégorie..." 
                                 class="w-full px-3 py-1.5 pl-8 text-sm rounded border focus:outline-none focus:border-indigo-500"
                             >
@@ -59,6 +81,8 @@
                         <button 
                             class="w-full text-left px-4 py-2 rounded-md hover:bg-indigo-50 filter-btn active flex items-center justify-between"
                             data-category="all"
+                            data-action="click->tools-filter#toggleFilter"
+                            data-tools-filter-target="filterBtn"
                         >
                             <span>Toutes les catégories</span>
                             <svg class="w-4 h-4 text-indigo-600 check-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,6 +93,8 @@
                             <button 
                                 class="w-full text-left px-4 py-2 rounded-md hover:bg-indigo-50 filter-btn flex items-center justify-between"
                                 data-category="{{ category|lower }}"
+                                data-action="click->tools-filter#toggleFilter"
+                                data-tools-filter-target="filterBtn"
                             >
                                 <span>{{ category }}</span>
                                 <svg class="w-4 h-4 text-indigo-600 check-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -81,7 +107,7 @@
             </div>
 
             <!-- Filtres actifs -->
-            <div id="active-filters" class="mt-4 flex flex-wrap gap-2">
+            <div id="active-filters" class="mt-4 flex flex-wrap gap-2" data-tools-filter-target="activeFilters">
             </div>
         </div>
 
@@ -89,6 +115,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="tools-grid">
             {% for tool in tools %}
                 <div class="tool-card bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 relative"
+                    data-tools-filter-target="toolCard"
                     data-categories="{{ tool.categories|map(c => c.name|lower)|join(' ') }}"
                     data-name="{{ tool.name|lower }}"
                     data-description="{{ tool.description|lower }}">
@@ -138,197 +165,6 @@
         </div>
     </div>
 
-    <script>
-    document.addEventListener('turbo:load', function() {
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        const toolCards = document.querySelectorAll('.tool-card');
-        const searchInput = document.getElementById('search-input');
-        const categorySearch = document.getElementById('category-search');
-        const activeFiltersContainer = document.getElementById('active-filters');
-        const dropdown = document.getElementById('category-dropdown');
-        const dropdownLabel = document.getElementById('dropdown-label');
-        const selectedCount = document.getElementById('selected-count');
-        const menu = document.getElementById('category-menu');
-        
-        let activeFilters = new Set(['all']);
-        let searchTerm = '';
-
-        dropdown.addEventListener('click', () => {
-            menu.classList.toggle('hidden');
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!dropdown.contains(e.target) && !menu.contains(e.target)) {
-                menu.classList.add('hidden');
-            }
-        });
-
-        categorySearch.addEventListener('input', function(e) {
-            const searchValue = e.target.value.toLowerCase();
-            const categoryButtons = menu.querySelectorAll('.filter-btn:not([data-category="all"])');
-            
-            categoryButtons.forEach(btn => {
-                const categoryName = btn.textContent.trim().toLowerCase();
-                btn.style.display = categoryName.includes(searchValue) ? 'flex' : 'none';
-            });
-        });
-
-        searchInput.addEventListener('input', function(e) {
-            searchTerm = e.target.value.toLowerCase();
-            filterTools();
-        });
-
-        function updateSelectedCount() {
-            const count = activeFilters.has('all') ? 0 : activeFilters.size;
-            selectedCount.textContent = count > 0 ? count : '';
-            
-            if (count > 0) {
-                const selectedCategories = Array.from(activeFilters);
-                dropdownLabel.textContent = selectedCategories.slice(0, 2).join(', ') + 
-                    (count > 2 ? ` (+${count - 2})` : '');
-            } else {
-                dropdownLabel.textContent = 'Filtrer par catégories';
-            }
-        }
-
-        function updateActiveFilters() {
-            activeFiltersContainer.innerHTML = '';
-            if (activeFilters.has('all')) return;
-            
-            const filterCount = activeFilters.size;
-            if (filterCount > 0) {
-                activeFiltersContainer.innerHTML = `
-                    <div class="flex items-center flex-wrap gap-2">
-                        <span class="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm font-medium">
-                            ${filterCount} filtre${filterCount > 1 ? 's' : ''} actif${filterCount > 1 ? 's' : ''}
-                        </span>
-                        ${Array.from(activeFilters).map(filter => `
-                            <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm flex items-center">
-                                ${filter}
-                                <button class="ml-2 text-gray-500 hover:text-gray-700" data-remove="${filter}">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </span>
-                        `).join('')}
-                        <button class="text-sm text-indigo-600 hover:text-indigo-800" onclick="clearAllFilters()">
-                            Effacer tout
-                        </button>
-                    </div>
-                `;
-            }
-
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                const category = btn.getAttribute('data-category');
-                const checkIcon = btn.querySelector('.check-icon');
-                if (activeFilters.has(category)) {
-                    checkIcon.classList.remove('hidden');
-                    btn.classList.add('bg-indigo-50');
-                } else {
-                    checkIcon.classList.add('hidden');
-                    btn.classList.remove('bg-indigo-50');
-                }
-            });
-
-            updateSelectedCount();
-
-            activeFiltersContainer.querySelectorAll('[data-remove]').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    removeFilter(this.getAttribute('data-remove'));
-                });
-            });
-        }
-
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const category = this.getAttribute('data-category');
-                
-                if (category === 'all') {
-                    clearAllFilters();
-                } else {
-                    activeFilters.delete('all');
-                    this.classList.toggle('active');
-                    
-                    if (this.classList.contains('active')) {
-                        activeFilters.add(category);
-                    } else {
-                        activeFilters.delete(category);
-                    }
-                    
-                    if (activeFilters.size === 0) {
-                        resetToAllFilters();
-                    }
-                }
-                
-                updateActiveFilters();
-                filterTools();
-                menu.classList.add('hidden');
-            });
-        });
-
-        function filterTools() {
-            toolCards.forEach(card => {
-                const cardCategories = card.getAttribute('data-categories').split(' ');
-                const cardName = card.getAttribute('data-name');
-                const cardDescription = card.getAttribute('data-description');
-                
-                const matchesSearch = searchTerm === '' || 
-                    cardName.includes(searchTerm) || 
-                    cardDescription.includes(searchTerm) ||
-                    cardCategories.some(cat => cat.includes(searchTerm));
-                
-                const matchesFilter = activeFilters.has('all') || 
-                    Array.from(activeFilters).some(filter => cardCategories.includes(filter));
-
-                const shouldDisplay = matchesSearch && matchesFilter;
-                
-                if (shouldDisplay) {
-                    card.style.display = 'block';
-                    setTimeout(() => {
-                        card.style.opacity = '1';
-                        card.style.transform = 'translateY(0)';
-                    }, 10);
-                } else {
-                    card.style.opacity = '0';
-                    card.style.transform = 'translateY(20px)';
-                    setTimeout(() => card.style.display = 'none', 200);
-                }
-            });
-        }
-
-        function removeFilter(filter) {
-            activeFilters.delete(filter);
-            document.querySelector(`[data-category="${filter}"]`).classList.remove('active');
-            if (activeFilters.size === 0) {
-                resetToAllFilters();
-            }
-            filterTools();
-            updateActiveFilters();
-        }
-
-        function resetToAllFilters() {
-            activeFilters.clear();
-            activeFilters.add('all');
-            document.querySelector('[data-category="all"]').classList.add('active');
-        }
-
-        window.clearAllFilters = function() {
-            filterBtns.forEach(btn => btn.classList.remove('active'));
-            resetToAllFilters();
-            filterTools();
-            updateActiveFilters();
-        };
-
-        toolCards.forEach(card => {
-            card.style.transition = 'opacity 0.2s ease-in-out, transform 0.2s ease-in-out';
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
-        });
-
-        updateActiveFilters();
-    });
-    </script>
 
     <style>
         .filter-btn.active {
