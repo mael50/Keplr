@@ -56,7 +56,7 @@ class ToolController extends AbstractController
 
         $domain = parse_url($url, PHP_URL_HOST);
 
-        $existingTools = $this->toolRepository->findAll();
+        $existingTools = $this->toolRepository->findBy(['user' => $this->getUser()]);
         foreach ($existingTools as $existingTool) {
             $existingDomain = parse_url($existingTool->getUrl(), PHP_URL_HOST);
             if ($domain === $existingDomain) {

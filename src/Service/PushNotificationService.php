@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\User;
 use Minishlink\WebPush\WebPush;
 use Minishlink\WebPush\Subscription;
 
