@@ -20,20 +20,21 @@ async function initializeNotifications() {
         return;
     }
 
-    // Vérifie d'abord si l'utilisateur est connecté
-    // si la route n'est pas /login ou /register
+    // Déclarer loggedIn en dehors des blocs conditionnels
+    let loggedIn = false;
+
+    // Vérifie si l'utilisateur est connecté
     if (!['/login', '/register'].includes(window.location.pathname)) {
-        const loggedIn = await isLoggedIn();
-    } else {
-        const loggedIn = false;
+        loggedIn = await isLoggedIn();
     }
+
     if (!loggedIn) {
         console.log('Utilisateur non connecté, notifications désactivées');
         return;
     }
 
     try {
-        // Sur mobile, on attend un clic n'importe où sur la page
+        // Le reste du code reste inchangé...
         if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
             let notificationRequested = false;
 
@@ -42,9 +43,8 @@ async function initializeNotifications() {
                     notificationRequested = true;
                     await requestAndSubscribe();
                 }
-            }, { once: true }); // L'événement ne sera déclenché qu'une seule fois
+            }, { once: true });
         } else {
-            // Sur desktop, on peut demander directement
             await requestAndSubscribe();
         }
     } catch (error) {
