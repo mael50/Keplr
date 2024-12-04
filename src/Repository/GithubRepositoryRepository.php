@@ -7,7 +7,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<GithubRepository>
+ * @extends ServiceEntityRepository<\App\Entity\GithubRepository>
  */
 class GithubRepositoryRepository extends ServiceEntityRepository
 {

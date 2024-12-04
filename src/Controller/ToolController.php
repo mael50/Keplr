@@ -109,6 +109,52 @@ class ToolController extends AbstractController
         return $this->redirectToRoute('app_tools');
     }
 
+    #[Route('/tool/edit/{id}', name: 'app_tool_edit')]
+    public function edit(Request $request, int $id): Response
+    {
+        $tool = $this->toolRepository->find($id);
+
+        if (!$tool) {
+            return $this->redirectToRoute('app_tools');
+        }
+
+        if ($tool->getUser() !== $this->getUser()) {
+            return $this->redirectToRoute('app_tools');
+        }
+
+        if ($request->isMethod('POST')) {
+            $tool->setName($request->request->get('name'));
+            $tool->setDescription($request->request->get('description'));
+            $tool->setCover($request->request->get('cover'));
+
+            // Récupérer les catégories sélectionnées (ou tableau vide si aucune)
+            $selectedCategories = $request->request->all('categories') ?? [];
+
+            // Supprimer toutes les catégories existantes
+            foreach ($tool->getCategories() as $existingCategory) {
+                $tool->removeCategory($existingCategory);
+            }
+
+            // Ajouter les nouvelles catégories sélectionnées
+            foreach ($selectedCategories as $categoryName) {
+                $category = $this->categoryRepository->findOneBy(['name' => $categoryName]);
+                if ($category) {
+                    $tool->addCategory($category);
+                }
+            }
+
+            $this->em->persist($tool);
+            $this->em->flush();
+
+            return $this->redirectToRoute('app_tools');
+        }
+
+        return $this->render('tool/edit.html.twig', [
+            'tool' => $tool,
+            'categories' => $this->categoryRepository->findBy(['user' => $this->getUser()])
+        ]);
+    }
+
     #[Route('/tool/delete/{id}', name: 'app_tool_delete')]
     public function delete(int $id): Response
     {
