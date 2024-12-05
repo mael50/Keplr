@@ -87,7 +87,7 @@ class FetchGithubReleasesCommand extends Command
 
                             $subscriptions = $this->entityManager
                                 ->getRepository(PushSubscription::class)
-                                ->findAll();
+                                ->findBy(['user' => $repository->getUser()]);
 
                             foreach ($subscriptions as $subscription) {
                                 $this->pushNotificationService->sendNotification(

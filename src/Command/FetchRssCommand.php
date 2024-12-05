@@ -64,7 +64,7 @@ class FetchRssCommand extends Command
 
                         $subscriptions = $this->entityManager
                             ->getRepository(PushSubscription::class)
-                            ->findAll();
+                            ->findBy(['user' => $rssFeed->getUser()]);
 
                         foreach ($subscriptions as $subscription) {
                             $this->pushNotificationService->sendNotification(
