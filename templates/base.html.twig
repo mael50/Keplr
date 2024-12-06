@@ -36,7 +36,7 @@
             {% include 'partials/header.html.twig' %}
         {% endif %}
         <main class="{% if current_route in full_screen_routes %}
-              fixed inset-0 w-full h-full overflow-hidden
+              fixed inset-0 w-full h-full overflow-hidden fullscreen_page
             {% else %}
               flex-1 w-full min-h-screen
             {% endif %}">
@@ -77,12 +77,12 @@
     </script>
 
     <style>
-        main {
+        .fullscreen_page {
             margin-left: 16rem;
         }
 
         @media (max-width: 1024px) {
-            main {
+            .fullscreen_page {
                 margin-left: 0;
             }
         }
