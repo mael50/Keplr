@@ -1,3 +1,11 @@
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.store('sidebar', {
+            open: false
+        })
+    })
+</script>
+
 <div>
     <!-- Bouton hamburger (mobile uniquement) -->
     <button 
@@ -12,10 +20,10 @@
         x-data="{ open: false, activeMenu: null }"
         @toggle-sidebar.window="open = !open"
         :class="{'translate-x-0': open, '-translate-x-full': !open}"
-        class="fixed top-0 left-0 w-64 h-full bg-gradient-to-b from-gray-100 to-white text-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 z-10">
+        class="fixed top-0 left-0 w-64 h-full bg-gradient-to-b from-gray-100 to-white text-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 z-10 flex flex-col">
         
-        <!-- Header mobile avec profil -->
-        <div class="lg:hidden p-4 border-b border-gray-200">
+        <!-- Header mobile avec profil (fixe) -->
+        <div class="lg:hidden p-4 border-b border-gray-200 flex-shrink-0">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-2">
                     <img src="https://www.gravatar.com/avatar/{{ app.user.email }}?s=40&d=mp" 
@@ -31,87 +39,90 @@
             </div>
         </div>
 
-        <!-- Logo -->
-        <div class="p-4 border-b border-gray-200">
+        <!-- Logo (fixe) -->
+        <div class="p-4 border-b border-gray-200 flex-shrink-0">
             <img src="/logo_keplr.png" alt="Logo" class="mx-auto" style="width: 150px;">
         </div>
 
-        <!-- Navigation -->
-        <nav class="p-4 space-y-6">
-            <!-- Accueil -->
-            <div>
-                <a href="/" 
-                   class="flex items-center px-4 py-2 rounded-lg transition-colors {{ app.request.attributes.get('_route') == 'app_home' ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100' }}">
-                    <i class="fas fa-home w-5"></i>
-                    <span class="ml-3">Tableau de bord</span>
-                </a>
-            </div>
+        <!-- Zone scrollable -->
+        <div class="flex-1 overflow-y-auto">
+            <!-- Navigation -->
+            <nav class="p-4 space-y-6">
+                <!-- Accueil -->
+                <div>
+                    <a href="/" 
+                       class="flex items-center px-4 py-2 rounded-lg transition-colors {{ app.request.attributes.get('_route') == 'app_home' ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100' }}">
+                        <i class="fas fa-home w-5"></i>
+                        <span class="ml-3">Tableau de bord</span>
+                    </a>
+                </div>
 
-            <!-- Outils -->
-            <div class="space-y-2">
-                <div class="px-4 text-xs font-semibold text-gray-500 uppercase">Outils</div>
-                <a href="/tools" 
-                   class="flex items-center px-4 py-2 rounded-lg transition-colors {{ app.request.attributes.get('_route') == 'app_tools' ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100' }}">
-                    <i class="fas fa-tools w-5"></i>
-                    <span class="ml-3">Catalogue des outils</span>
-                </a>
-            </div>
+                <!-- Outils -->
+                <div class="space-y-2">
+                    <div class="px-4 text-xs font-semibold text-gray-500 uppercase">Outils</div>
+                    <a href="/tools" 
+                       class="flex items-center px-4 py-2 rounded-lg transition-colors {{ app.request.attributes.get('_route') == 'app_tools' ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100' }}">
+                        <i class="fas fa-tools w-5"></i>
+                        <span class="ml-3">Catalogue des outils</span>
+                    </a>
+                </div>
 
-            <!-- Actualités -->
-            <div class="space-y-2">
-                <div class="px-4 text-xs font-semibold text-gray-500 uppercase">Actualités</div>
-                <a href="/news" 
-                   class="flex items-center px-4 py-2 rounded-lg transition-colors relative {{ app.request.attributes.get('_route') == 'app_article' ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100' }}">
-                    <i class="fas fa-newspaper w-5"></i>
-                    <span class="ml-3">Dernières actualités</span>
-                    {% if has_unread_articles() %}
-                        <span class="absolute right-2 flex h-3 w-3">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                        </span>
-                    {% endif %}
-                </a>
-                <a href="/rss" 
-                   class="flex items-center px-4 py-2 rounded-lg transition-colors {{ app.request.attributes.get('_route') == 'app_rss' ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100' }}">
-                    <i class="fas fa-rss w-5"></i>
-                    <span class="ml-3">Flux RSS</span>
-                </a>
-            </div>
+                <!-- Actualités -->
+                <div class="space-y-2">
+                    <div class="px-4 text-xs font-semibold text-gray-500 uppercase">Actualités</div>
+                    <a href="/news" 
+                       class="flex items-center px-4 py-2 rounded-lg transition-colors relative {{ app.request.attributes.get('_route') == 'app_article' ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100' }}">
+                        <i class="fas fa-newspaper w-5"></i>
+                        <span class="ml-3">Dernières actualités</span>
+                        {% if has_unread_articles() %}
+                            <span class="absolute right-2 flex h-3 w-3">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                            </span>
+                        {% endif %}
+                    </a>
+                    <a href="/rss" 
+                       class="flex items-center px-4 py-2 rounded-lg transition-colors {{ app.request.attributes.get('_route') == 'app_rss' ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100' }}">
+                        <i class="fas fa-rss w-5"></i>
+                        <span class="ml-3">Flux RSS</span>
+                    </a>
+                </div>
 
-            <!-- Versions -->
-            <div class="space-y-2">
-                <div class="px-4 text-xs font-semibold text-gray-500 uppercase">Versions</div>
-                <a href="/releases/latest" 
-                   class="flex items-center px-4 py-2 rounded-lg transition-colors {{ app.request.attributes.get('_route') == 'app_github_repos' ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100' }}">
-                    <i class="fas fa-code-branch w-5"></i>
-                    <span class="ml-3">Dernières versions</span>
-                </a>
-            </div>
+                <!-- Versions -->
+                <div class="space-y-2">
+                    <div class="px-4 text-xs font-semibold text-gray-500 uppercase">Versions</div>
+                    <a href="/releases/latest" 
+                       class="flex items-center px-4 py-2 rounded-lg transition-colors {{ app.request.attributes.get('_route') == 'app_github_repos' ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100' }}">
+                        <i class="fas fa-code-branch w-5"></i>
+                        <span class="ml-3">Dernières versions</span>
+                    </a>
+                </div>
 
-            <!-- Chaines YouTube -->
-            <div class="space-y-2">
-                <div class="px-4 text-xs font-semibold text-gray-500 uppercase">Chaînes YouTube</div>
-                <a href="/youtube/list"
-                   class="flex items-center px-4 py-2 rounded-lg transition-colors {{ app.request.attributes.get('_route') == 'app_youtube' ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100' }}">
-                    <i class="fab fa-youtube w-5"></i>
-                    <span class="ml-3">Chaînes YouTube</span>
-                </a>
-                <a href="/youtube/latest-videos"
-                   class="flex items-center px-4 py-2 rounded-lg transition-colors {{ app.request.attributes.get('_route') == 'app_youtube_latest' ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100' }}">
-                    <i class="fas fa-video w-5"></i>
-                    <span class="ml-3">Dernières vidéos</span>
-                </a>
-            </div>
+                <!-- Chaines YouTube -->
+                <div class="space-y-2">
+                    <div class="px-4 text-xs font-semibold text-gray-500 uppercase">Chaînes YouTube</div>
+                    <a href="/youtube/list"
+                       class="flex items-center px-4 py-2 rounded-lg transition-colors {{ app.request.attributes.get('_route') == 'app_youtube' ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100' }}">
+                        <i class="fab fa-youtube w-5"></i>
+                        <span class="ml-3">Chaînes YouTube</span>
+                    </a>
+                    <a href="/youtube/latest-videos"
+                       class="flex items-center px-4 py-2 rounded-lg transition-colors {{ app.request.attributes.get('_route') == 'app_youtube_latest' ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100' }}">
+                        <i class="fas fa-video w-5"></i>
+                        <span class="ml-3">Dernières vidéos</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
 
-            <!-- Menu déconnexion (mobile uniquement) -->
-            <div class="lg:hidden mt-auto pt-6 border-t border-gray-200">
-                <a href="{{ path('app_logout') }}" 
-                   class="flex items-center px-4 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors">
-                    <i class="fas fa-sign-out-alt w-5"></i>
-                    <span class="ml-3">Déconnexion</span>
-                </a>
-            </div>
-        </nav>
+        <!-- Menu déconnexion (mobile uniquement) -->
+        <div class="lg:hidden p-4 border-t border-gray-200 flex-shrink-0">
+            <a href="{{ path('app_logout') }}" 
+               class="flex items-center px-4 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors">
+                <i class="fas fa-sign-out-alt w-5"></i>
+                <span class="ml-3">Déconnexion</span>
+            </a>
+        </div>
     </div>
 
     <!-- Overlay sombre pour mobile -->
