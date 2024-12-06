@@ -28,5 +28,9 @@ services:
                     publicKey: '%env(VAPID_PUBLIC_KEY)%'
                     privateKey: '%env(VAPID_PRIVATE_KEY)%'
 
+    App\Service\YoutubeService:
+        arguments:
+            $apiKey: '%env(YOUTUBE_API_KEY)%'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

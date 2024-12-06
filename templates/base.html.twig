@@ -21,6 +21,7 @@
 
         {% block javascripts %}
             <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
             {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}
         {{ encore_entry_link_tags('app') }}
@@ -34,17 +35,17 @@
             {% include 'partials/sidebar.html.twig' %}
             {% include 'partials/header.html.twig' %}
         {% endif %}
-
         <main class="{% if current_route in full_screen_routes %}
-                      fixed inset-0 w-full h-full overflow-hidden
-                    {% else %}
-                      flex-1 w-full min-h-screen ml-0 md:ml-64
-                    {% endif %}">
+              fixed inset-0 w-full h-full overflow-hidden
+            {% else %}
+              flex-1 w-full min-h-screen
+            {% endif %}">
             
             {% if current_route not in full_screen_routes %}
                 {% for label, messages in app.flashes %}
                     {% for message in messages %}
-                    <div style="padding: 1rem; margin-bottom: 1rem; font-size: 0.875rem; color: {{ label == 'success' ? '#065f46' : (label == 'error' ? '#991b1b' : '#92400e') }}; background-color: {{ label == 'success' ? '#d1fae5' : (label == 'error' ? '#fee2e2' : '#fffbeb') }}; border-radius: 0.5rem;" role="alert">
+                    <div style="padding: 1rem; margin-bottom: 1rem; font-size: 0.875rem; color: {{ label == 'success' ? '#065f46' : (label == 'error' ? '#991b1b' : '#92400e') }}; background-color: {{ label == 'success' ? '#d1fae5' : (label == 'error' ? '#fee2e2' : '#fffbeb') }}; border-radius: 0.5rem; z-index: 500; position: relative;" role="alert">
+                        <span style="position: absolute; top: 0.5rem; right: 0.5rem; cursor: pointer;" onclick="this.parentElement.style.display='none';">&times;</span>
                         {{ message }}
                     </div>
                     {% endfor %}
@@ -74,4 +75,16 @@
         });
     }
     </script>
+
+    <style>
+        main {
+            margin-left: 16rem;
+        }
+
+        @media (max-width: 1024px) {
+            main {
+                margin-left: 0;
+            }
+        }
+    </style>
 </html>

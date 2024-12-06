@@ -4,10 +4,12 @@ namespace App\Controller;
 
 use App\Form\ToolType;
 use App\Form\RSSFeedType;
+use App\Form\YoutubeChannelType;
 use App\Form\GithubRepositoryType;
 use App\Repository\ToolRepository;
 use App\Repository\ArticleRepository;
 use App\Repository\RSSFeedRepository;
+use App\Repository\YoutubeChannelRepository;
 use Symfony\Component\HttpFoundation\Request;
 use App\Repository\GithubRepositoryRepository;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,17 +23,20 @@ class IndexController extends AbstractController
     private $rssFeedRepository;
     private $articleRepository;
     private $githubRepositoryRepository;
+    private $youtubeChannelRepository;
 
     public function __construct(
         ToolRepository $toolRepository,
         RSSFeedRepository $rssFeedRepository,
         ArticleRepository $articleRepository,
-        GithubRepositoryRepository $githubRepositoryRepository
+        GithubRepositoryRepository $githubRepositoryRepository,
+        YoutubeChannelRepository $youtubeChannelRepository
     ) {
         $this->toolRepository = $toolRepository;
         $this->rssFeedRepository = $rssFeedRepository;
         $this->articleRepository = $articleRepository;
         $this->githubRepositoryRepository = $githubRepositoryRepository;
+        $this->youtubeChannelRepository = $youtubeChannelRepository;
     }
 
     #[Route('/', name: 'app_home')]
@@ -40,6 +45,7 @@ class IndexController extends AbstractController
         $tools = $this->toolRepository->findBy(['user' => $this->getUser()]);
         $rssFeeds = $this->rssFeedRepository->findBy(['user' => $this->getUser()]);
         $repositories = $this->githubRepositoryRepository->findBy(['user' => $this->getUser()]);
+        $youtubeChannels = $this->youtubeChannelRepository->findBy(['user' => $this->getUser()]);
 
         $articles = [];
         $dates = [];
@@ -88,15 +94,28 @@ class IndexController extends AbstractController
             ]);
         }
 
+        // FORMULAIRE POUR LES CHAINES YOUTUBE
+        $youtubeChannelForm = $this->createForm(YoutubeChannelType::class);
+        $youtubeChannelForm->handleRequest($request);
+
+        if ($youtubeChannelForm->isSubmitted() && $youtubeChannelForm->isValid()) {
+            $youtubeChannel = $youtubeChannelForm->getData();
+            return $this->redirectToRoute('app_youtube_channel_add', [
+                'url' => $youtubeChannel->getUrl(),
+            ]);
+        }
+
 
         return $this->render('index/index.html.twig', [
             'toolForm' => $toolForm->createView(),
             'rssFeedForm' => $rssFeedForm->createView(),
             'githubRepoForm' => $githubRepoForm->createView(),
+            'youtubeChannelForm' => $youtubeChannelForm->createView(),
             'tools' => $tools,
             'rssFeeds' => $rssFeeds,
             'dates' => $dates,
             'repositories' => $repositories,
+            'youtubeChannels' => $youtubeChannels,
         ]);
     }
 

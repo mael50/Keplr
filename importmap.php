@@ -35,4 +35,19 @@ return [
     '@symfony/ux-live-component' => [
         'path' => './vendor/symfony/ux-live-component/assets/dist/live_controller.js',
     ],
+    'swiper' => [
+        'version' => '11.1.15',
+    ],
+    'swiper/css' => [
+        'version' => '11.1.15',
+    ],
+    'swiper/css/navigation' => [
+        'version' => '11.1.15',
+    ],
+    'swiper/css/pagination' => [
+        'version' => '11.1.15',
+    ],
+    'swiper/modules' => [
+        'version' => '11.1.15',
+    ],
 ];

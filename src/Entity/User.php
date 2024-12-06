@@ -65,6 +65,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Category::class, mappedBy: 'user')]
     private Collection $categories;
 
+    /**
+     * @var Collection<int, YoutubeChannel>
+     */
+    #[ORM\OneToMany(targetEntity: YoutubeChannel::class, mappedBy: 'user')]
+    private Collection $youtubeChannels;
+
     public function __construct()
     {
         $this->pushSubscriptions = new ArrayCollection();
@@ -72,6 +78,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->rSSFeeds = new ArrayCollection();
         $this->githubRepositories = new ArrayCollection();
         $this->categories = new ArrayCollection();
+        $this->youtubeChannels = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -293,6 +300,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($category->getUser() === $this) {
                 $category->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, YoutubeChannel>
+     */
+    public function getYoutubeChannels(): Collection
+    {
+        return $this->youtubeChannels;
+    }
+
+    public function addYoutubeChannel(YoutubeChannel $youtubeChannel): static
+    {
+        if (!$this->youtubeChannels->contains($youtubeChannel)) {
+            $this->youtubeChannels->add($youtubeChannel);
+            $youtubeChannel->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeYoutubeChannel(YoutubeChannel $youtubeChannel): static
+    {
+        if ($this->youtubeChannels->removeElement($youtubeChannel)) {
+            // set the owning side to null (unless already changed)
+            if ($youtubeChannel->getUser() === $this) {
+                $youtubeChannel->setUser(null);
             }
         }
 

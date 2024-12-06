@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des chaînes Youtube{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-8">Chaînes YouTube</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for channel in channels %}
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 relative">
+                <a href="{{ channel.url }}" target="_blank" class="block group">
+                    <div class="relative aspect-video">
+                        {% if channel.photo %}
+                            <img src="{{ channel.photo }}" 
+                                 alt="{{ channel.name }}" 
+                                 class="absolute inset-0 w-full h-full object-cover">
+                        {% else %}
+                            <div class="absolute inset-0 bg-gray-200 flex items-center justify-center">
+                                <span class="text-gray-400 text-lg">Pas d'image</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="p-6">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-2 group-hover:text-red-600 transition-colors">
+                            {{ channel.name }}
+                        </h2>
+                        <p class="text-gray-600 mb-4 line-clamp-2">{{ channel.description }}</p>
+                    </div>
+                </a>
+
+                <div class="absolute top-4 right-4 flex space-x-2">
+                    <a href="{{ path('app_youtube_channel_edit', {'id': channel.id}) }}" 
+                       class="p-1 bg-white/80 rounded-full text-indigo-400 hover:text-indigo-600 transition-colors"
+                       title="Modifier cette chaîne">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                    </a>
+
+                    <button onclick="if(confirm('Êtes-vous sûr de vouloir supprimer {{ channel.name|e('js') }} ?')) window.location.href='{{ path('app_youtube_channel_delete', {'id': channel.id}) }}'"
+                            class="p-1 bg-white/80 rounded-full text-red-400 hover:text-red-600 transition-colors"
+                            title="Supprimer cette chaîne">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
