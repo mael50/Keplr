@@ -1,10 +1,11 @@
 <?php
-// src/Command/FetchLatestYoutubeVideosCommand.php
 
 namespace App\Command;
 
 use App\Entity\Video;
+use App\Entity\PushSubscription;
 use App\Service\YoutubeService;
+use App\Service\PushNotificationService;
 use App\Repository\VideoRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\YoutubeChannelRepository;
@@ -26,14 +27,10 @@ class FetchLatestYoutubeVideosCommand extends Command
         private YoutubeChannelRepository $channelRepository,
         private VideoRepository $videoRepository,
         private YoutubeService $youtubeService,
-        private EntityManagerInterface $em
+        private EntityManagerInterface $em,
+        private PushNotificationService $pushNotificationService
     ) {
         parent::__construct();
-    }
-
-    protected function configure(): void
-    {
-        $this->setDescription('Récupère les dernières vidéos YouTube de tous les channels');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -66,6 +63,25 @@ class FetchLatestYoutubeVideosCommand extends Command
 
                 $this->em->persist($video);
                 $this->em->flush();
+
+                // Envoi des notifications push
+                $subscriptions = $this->em
+                    ->getRepository(PushSubscription::class)
+                    ->findBy(['user' => $channel->getUser()]);
+
+                foreach ($subscriptions as $subscription) {
+                    $this->pushNotificationService->sendNotification(
+                        [
+                            'endpoint' => $subscription->getEndpoint(),
+                            'keys' => [
+                                'p256dh' => $subscription->getP256dh(),
+                                'auth' => $subscription->getAuth()
+                            ]
+                        ],
+                        'Nouvelle vidéo : ' . $channel->getName(),
+                        $video->getTitle()
+                    );
+                }
 
                 $io->success(sprintf(
                     'Nouvelle vidéo ajoutée pour %s: %s',
