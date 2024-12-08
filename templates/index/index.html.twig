@@ -74,10 +74,14 @@
                             Voir toutes les releases <i class="fas fa-arrow-right ml-2"></i>
                         </a>
                     </div>
-
                     {% if repositories|length > 0 %}
                         <div class="space-y-4">
-                            {% for repository in repositories|slice(0, 3) %}
+                            {% set sorted_repositories = repositories|sort((a, b) => 
+                                b.releases|sort((r1, r2) => r2.updated <=> r1.updated)|first.updated 
+                                <=> 
+                                a.releases|sort((r1, r2) => r2.updated <=> r1.updated)|first.updated
+                            ) %}
+                            {% for repository in sorted_repositories|slice(0, 3) %}
                                 {% set latestRelease = repository.releases|sort((a, b) => b.updated <=> a.updated)|first %}
                                 {% if latestRelease %}
                                     <div class="bg-gray-50 rounded-xl p-5 hover:bg-gray-100 transition-colors duration-200">
