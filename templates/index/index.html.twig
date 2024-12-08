@@ -15,7 +15,7 @@
                 </div>
 
                 <!-- Statistiques rapides -->
-                {# <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                     <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl p-6 text-white">
                         <div class="text-sm font-semibold opacity-75">Outils ajoutés</div>
                         <div class="text-3xl font-bold mt-2">{{ tools|length }}</div>
@@ -32,9 +32,17 @@
                         <div class="text-sm font-semibold opacity-75">Chaînes Youtubes suivies</div>
                         <div class="text-3xl font-bold mt-2">{{ youtubeChannels|length }}</div>
                     </div>
-                </div> #}
+                </div>
 
-                <!-- Section des formulaires -->
+
+                <!-- Stats des articles -->
+                {# <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white">
+                        <div class="text-sm font-semibold opacity-75">Articles non lus</div>
+                        <div class="text-3xl font-bold mt-2">{{ stats.unread_articles }}</div>
+                        <div class="text-sm mt-2">sur {{ stats.total_articles }} articles</div>
+                    </div>
+                </div> #}
                 
 
                 <!-- Récapitulatif des articles -->
@@ -100,6 +108,35 @@
                     {% else %}
                         <div class="text-center py-8 text-gray-500">
                             <p class="text-lg">Aucun repository GitHub ajouté</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+
+                <!-- Récapitulatif des vidéos -->
+                <div class="bg-white rounded-xl shadow-lg p-6 my-4">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900">Dernières vidéos YouTube</h2>
+                        <a href="{{ path('app_youtube_list') }}" class="text-red-600 hover:text-red-700 font-medium text-sm">
+                            Voir toutes les vidéos <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                    
+                    {% if latestVideos|length > 0 %}
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {% for video in latestVideos %}
+                                <div class="bg-gray-50 rounded-xl overflow-hidden">
+                                    <img src="{{ video.thumbnail }}" alt="{{ video.title }}" class="w-full aspect-video object-cover">
+                                    <div class="p-4">
+                                        <h4 class="font-semibold text-gray-900 line-clamp-2">{{ video.title }}</h4>
+                                        <p class="text-sm text-gray-600 mt-2">{{ video.channel.name }}</p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-8 text-gray-500">
+                            <p class="text-lg">Aucune vidéo YouTube récente</p>
                         </div>
                     {% endif %}
                 </div>

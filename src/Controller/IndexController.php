@@ -2,11 +2,13 @@
 
 namespace App\Controller;
 
+use App\Entity\Video;
 use App\Form\ToolType;
 use App\Form\RSSFeedType;
 use App\Form\YoutubeChannelType;
 use App\Form\GithubRepositoryType;
 use App\Repository\ToolRepository;
+use App\Repository\VideoRepository;
 use App\Repository\ArticleRepository;
 use App\Repository\RSSFeedRepository;
 use App\Repository\YoutubeChannelRepository;
@@ -24,19 +26,22 @@ class IndexController extends AbstractController
     private $articleRepository;
     private $githubRepositoryRepository;
     private $youtubeChannelRepository;
+    private $videoRepository;
 
     public function __construct(
         ToolRepository $toolRepository,
         RSSFeedRepository $rssFeedRepository,
         ArticleRepository $articleRepository,
         GithubRepositoryRepository $githubRepositoryRepository,
-        YoutubeChannelRepository $youtubeChannelRepository
+        YoutubeChannelRepository $youtubeChannelRepository,
+        VideoRepository $videoRepository
     ) {
         $this->toolRepository = $toolRepository;
         $this->rssFeedRepository = $rssFeedRepository;
         $this->articleRepository = $articleRepository;
         $this->githubRepositoryRepository = $githubRepositoryRepository;
         $this->youtubeChannelRepository = $youtubeChannelRepository;
+        $this->videoRepository = $videoRepository;
     }
 
     #[Route('/', name: 'app_home')]
@@ -64,12 +69,38 @@ class IndexController extends AbstractController
         }
         rsort($dates);
 
+        $totalArticles = 0;
+        $unreadArticles = 0;
+        foreach ($rssFeeds as $rssFeed) {
+            $totalArticles += $this->articleRepository->count(['RssFeed' => $rssFeed]);
+            $unreadArticles += $this->articleRepository->count(['RssFeed' => $rssFeed, 'isRead' => false]);
+        }
+
+
+        $stats = [
+            'total_articles' => $totalArticles,
+            'unread_articles' => $unreadArticles,
+        ];
+
+        $userChannels = $this->youtubeChannelRepository->findBy(['user' => $user]);
+        $latestVideos = [];
+        foreach ($userChannels as $channel) {
+            $channelVideos = $this->videoRepository->findBy(['channel' => $channel], ['updatedAt' => 'DESC'], 5);
+            $latestVideos = array_merge($latestVideos, $channelVideos);
+        }
+        usort($latestVideos, function ($a, $b) {
+            return $b->getUpdatedAt() <=> $a->getUpdatedAt();
+        });
+        $latestVideos = array_slice($latestVideos, 0, 5);
+
         return $this->render('index/index.html.twig', [
             'tools' => $tools,
             'rssFeeds' => $rssFeeds,
             'dates' => $dates,
             'repositories' => $repositories,
             'youtubeChannels' => $youtubeChannels,
+            'stats' => $stats,
+            'latestVideos' => $latestVideos,
         ]);
     }
 
