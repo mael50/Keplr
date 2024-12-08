@@ -40,14 +40,14 @@ class IndexController extends AbstractController
     }
 
     #[Route('/', name: 'app_home')]
-    public function index(Request $request): Response
+    public function index(): Response
     {
-        $tools = $this->toolRepository->findBy(['user' => $this->getUser()]);
-        $rssFeeds = $this->rssFeedRepository->findBy(['user' => $this->getUser()]);
-        $repositories = $this->githubRepositoryRepository->findBy(['user' => $this->getUser()]);
-        $youtubeChannels = $this->youtubeChannelRepository->findBy(['user' => $this->getUser()]);
+        $user = $this->getUser();
+        $tools = $this->toolRepository->findBy(['user' => $user]);
+        $rssFeeds = $this->rssFeedRepository->findBy(['user' => $user]);
+        $repositories = $this->githubRepositoryRepository->findBy(['user' => $user]);
+        $youtubeChannels = $this->youtubeChannelRepository->findBy(['user' => $user]);
 
-        $articles = [];
         $dates = [];
         foreach ($rssFeeds as $rssFeed) {
             $feedArticles = $this->articleRepository->findByRssFeed($rssFeed);
@@ -60,57 +60,7 @@ class IndexController extends AbstractController
         }
         rsort($dates);
 
-        // FORMULAIRE POUR LES OUTILS
-        $toolForm = $this->createForm(ToolType::class);
-        $toolForm->handleRequest($request);
-        $data = $toolForm->getData();
-
-        if ($toolForm->isSubmitted() && $toolForm->isValid()) {
-            return $this->redirectToRoute('app_tool_add', [
-                'url' => $data['url'],
-            ]);
-        }
-
-        // FORMULAIRE POUR LES FLUX RSS
-        $rssFeedForm = $this->createForm(RSSFeedType::class);
-        $rssFeedForm->handleRequest($request);
-
-        if ($rssFeedForm->isSubmitted() && $rssFeedForm->isValid()) {
-            $rssFeed = $rssFeedForm->getData();
-            return $this->redirectToRoute('app_rss_add', [
-                'url' => $rssFeed->getUrl(),
-                'name' => $rssFeed->getName(),
-            ]);
-        }
-
-        // FORMULAIRE POUR LES REPOS GITHUB
-        $githubRepoForm = $this->createForm(GithubRepositoryType::class);
-        $githubRepoForm->handleRequest($request);
-
-        if ($githubRepoForm->isSubmitted() && $githubRepoForm->isValid()) {
-            $githubRepo = $githubRepoForm->getData();
-            return $this->redirectToRoute('app_github_repo_add', [
-                'url' => $githubRepo->getUrl(),
-            ]);
-        }
-
-        // FORMULAIRE POUR LES CHAINES YOUTUBE
-        $youtubeChannelForm = $this->createForm(YoutubeChannelType::class);
-        $youtubeChannelForm->handleRequest($request);
-
-        if ($youtubeChannelForm->isSubmitted() && $youtubeChannelForm->isValid()) {
-            $youtubeChannel = $youtubeChannelForm->getData();
-            return $this->redirectToRoute('app_youtube_channel_add', [
-                'url' => $youtubeChannel->getUrl(),
-            ]);
-        }
-
-
         return $this->render('index/index.html.twig', [
-            'toolForm' => $toolForm->createView(),
-            'rssFeedForm' => $rssFeedForm->createView(),
-            'githubRepoForm' => $githubRepoForm->createView(),
-            'youtubeChannelForm' => $youtubeChannelForm->createView(),
             'tools' => $tools,
             'rssFeeds' => $rssFeeds,
             'dates' => $dates,

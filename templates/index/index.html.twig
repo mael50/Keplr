@@ -35,103 +35,7 @@
                 </div> #}
 
                 <!-- Section des formulaires -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 my-8">
-                    <!-- Formulaire Tool -->
-                    <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-12 h-12 flex items-center justify-center bg-indigo-100 rounded-xl">
-                                <i class="fas fa-tools text-xl text-indigo-600"></i>
-                            </div>
-                            <h2 class="text-xl font-semibold text-gray-900">Nouvel outil</h2>
-                        </div>
-                        {{ form_start(toolForm, {'attr': {'class': 'space-y-4'}}) }}
-                            <div>
-                                {{ form_widget(toolForm.url, {
-                                    'attr': {
-                                        'class': 'w-full p-2 rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500',
-                                        'placeholder': 'URL de l\'outil'
-                                    }
-                                }) }}
-                            </div>
-                            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
-                                <i class="fas fa-plus mr-2"></i>
-                                Ajouter
-                            </button>
-                        {{ form_end(toolForm) }}
-                    </div>
-
-                    <!-- Formulaire RSS -->
-                    <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-12 h-12 flex items-center justify-center bg-emerald-100 rounded-xl">
-                                <i class="fas fa-rss text-xl text-emerald-600"></i>
-                            </div>
-                            <h2 class="text-xl font-semibold text-gray-900">Nouveau flux RSS</h2>
-                        </div>
-                        {{ form_start(rssFeedForm, {'attr': {'class': 'space-y-4'}}) }}
-                            <div>
-                                {{ form_widget(rssFeedForm.url, {
-                                    'attr': {
-                                        'class': 'w-full p-2 rounded-lg border-gray-300 focus:border-orange-500 focus:ring-orange-500',
-                                        'placeholder': 'URL du flux RSS'
-                                    }
-                                }) }}
-                            </div>
-                            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-200">
-                                <i class="fas fa-plus mr-2"></i>
-                                Ajouter
-                            </button>
-                        {{ form_end(rssFeedForm) }}
-                    </div>
-
-                    <!-- Formulaire Github -->
-                    <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-12 h-12 flex items-center justify-center bg-amber-100 rounded-xl">
-                                <i class="fab fa-github text-xl text-amber-600"></i>
-                            </div>
-                            <h2 class="text-xl font-semibold text-gray-900">Nouveau dépôt</h2>
-                        </div>
-                        {{ form_start(githubRepoForm, {'attr': {'class': 'space-y-4'}}) }}
-                            <div>
-                                {{ form_widget(githubRepoForm.url, {
-                                    'attr': {
-                                        'class': 'w-full p-2 rounded-lg border-gray-300 focus:border-gray-500 focus:ring-gray-500',
-                                        'placeholder': 'URL du dépôt GitHub'
-                                    }
-                                }) }}
-                            </div>
-                            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg text-sm font-medium text-white bg-amber-600 hover:bg-amber-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200">
-                                <i class="fas fa-plus mr-2"></i>
-                                Ajouter
-                            </button>
-                        {{ form_end(githubRepoForm) }}
-                    </div>
-
-                    <!-- Formulaire de Chaîne Youtube -->
-                    <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-12 h-12 flex items-center justify-center bg-red-100 rounded-xl">
-                                <i class="fab fa-youtube text-xl text-red-600"></i>
-                            </div>
-                            <h2 class="text-xl font-semibold text-gray-900">Nouvelle chaîne Youtube</h2>
-                        </div>
-                        {{ form_start(youtubeChannelForm, {'attr': {'class': 'space-y-4'}}) }}
-                            <div>
-                                {{ form_widget(youtubeChannelForm.url, {
-                                    'attr': {
-                                        'class': 'w-full p-2 rounded-lg border-gray-300 focus:border-red-500 focus:ring-red-500',
-                                        'placeholder': 'URL de la chaîne Youtube'
-                                    }
-                                }) }}
-                            </div>
-                            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200">
-                                <i class="fas fa-plus mr-2"></i>
-                                Ajouter
-                            </button>
-                        {{ form_end(youtubeChannelForm) }}
-                    </div>
-                </div>
+                
 
                 <!-- Récapitulatif des articles -->
                 <div id="articles-container" class="bg-white rounded-xl shadow-lg p-6 my-4 transition-all duration-300 hover:shadow-xl">
@@ -209,14 +113,8 @@
         transform: translateY(0);
         transition: all 0.3s ease;
     }
-    .bg-white:hover {
-        transform: translateY(-4px);
-    }
     .bg-white {
         transition: transform 0.2s ease-in-out;
-    }
-    .bg-white:hover {
-        transform: translateY(-2px);
     }
     .line-clamp-1 {
         display: -webkit-box;

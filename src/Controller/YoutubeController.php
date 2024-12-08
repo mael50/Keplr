@@ -40,7 +40,23 @@ class YoutubeController extends AbstractController
     #[Route('/youtube/add', name: 'app_youtube_channel_add')]
     public function addChannel(Request $request): Response
     {
+        $userChannels = $this->youtubeChannelRepository->findBy(['user' => $this->getUser()]);
+
         if ($request->query->has('url')) {
+            $channelExists = false;
+
+            foreach ($userChannels as $channel) {
+                if ($channel->getUrl() === $request->query->get('url')) {
+                    $channelExists = true;
+                    break;
+                }
+            }
+
+            if ($channelExists) {
+                $this->addFlash('error', 'La chaîne YouTube existe déjà.');
+                return $this->redirectToRoute('app_youtube_list');
+            }
+
             $channel = new YoutubeChannel();
             $url = $request->query->get('url');
 
