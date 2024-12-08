@@ -16,6 +16,16 @@ class RSSFeedRepository extends ServiceEntityRepository
         parent::__construct($registry, RSSFeed::class);
     }
 
+    public function findBySearchTerm(string $term, $user)
+    {
+        return $this->createQueryBuilder('r')
+            ->where('(r.name LIKE :term OR r.url LIKE :term) AND r.user != :user')
+            ->setParameter('term', '%' . $term . '%')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return RSSFeed[] Returns an array of RSSFeed objects
     //     */

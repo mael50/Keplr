@@ -22,4 +22,14 @@ class GithubRepositoryRepository extends ServiceEntityRepository
         $entityManager->persist($entity);
         $entityManager->flush();
     }
+
+    public function findBySearchTerm(string $term, $user)
+    {
+        return $this->createQueryBuilder('g')
+            ->where('(g.name LIKE :term OR g.owner LIKE :term) AND g.user != :user')
+            ->setParameter('term', '%' . $term . '%')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getResult();
+    }
 }

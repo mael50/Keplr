@@ -16,6 +16,16 @@ class YoutubeChannelRepository extends ServiceEntityRepository
         parent::__construct($registry, YoutubeChannel::class);
     }
 
+    public function findBySearchTerm(string $term, $user)
+    {
+        return $this->createQueryBuilder('y')
+            ->where('(y.name LIKE :term OR y.description LIKE :term) AND y.user != :user')
+            ->setParameter('term', '%' . $term . '%')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return YoutubeChannel[] Returns an array of YoutubeChannel objects
     //     */

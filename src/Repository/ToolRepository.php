@@ -16,6 +16,16 @@ class ToolRepository extends ServiceEntityRepository
         parent::__construct($registry, Tool::class);
     }
 
+    public function findBySearchTerm(string $term, $user)
+    {
+        return $this->createQueryBuilder('t')
+            ->where('(t.name LIKE :term OR t.description LIKE :term) AND t.user != :user')
+            ->setParameter('term', '%' . $term . '%')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Tool[] Returns an array of Tool objects
     //     */
