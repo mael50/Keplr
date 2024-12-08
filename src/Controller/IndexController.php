@@ -48,6 +48,10 @@ class IndexController extends AbstractController
         $repositories = $this->githubRepositoryRepository->findBy(['user' => $user]);
         $youtubeChannels = $this->youtubeChannelRepository->findBy(['user' => $user]);
 
+        if (empty($tools) && empty($rssFeeds) && empty($repositories) && empty($youtubeChannels)) {
+            return $this->redirectToRoute('app_add');
+        }
+
         $dates = [];
         foreach ($rssFeeds as $rssFeed) {
             $feedArticles = $this->articleRepository->findByRssFeed($rssFeed);
